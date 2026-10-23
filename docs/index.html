@@ -1485,6 +1485,62 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     const lab = feld.querySelector('label:not(.check), .label-text');
     return pdfText(lab ? lab.textContent : '');
   }
+  // Wo die Werte in ELSTER hingehören (Formulare 2025). i = Person (0 = A, 1 = B).
+  const AB = 'Außergew. Belastungen';
+  const ELSTER = {
+    stand: () => 'Hauptvordruck (ESt 1 A)',
+    kirche: () => 'Hauptvordruck (ESt 1 A), Religion',
+    gesRente: () => 'Anlage R, Z. 4 (Kz 101)',
+    rentenbeginn: () => 'Anlage R, Z. 6 (Kz 103)',
+    rentenfreibetrag: () => 'nicht eintragen, rechnet das Finanzamt',
+    witwenrente: () => 'Anlage R, Z. 4, 2. Rente (Kz 151)',
+    witwenBeginn: () => 'Anlage R, Z. 6, 2. Rente (Kz 153)',
+    vorrenteBeginn: () => 'Anlage R, Z. 7, 2. Rente (Kz 155)',
+    witwenFreibetrag: () => 'nicht eintragen, rechnet das Finanzamt',
+    werbungskostenRente: () => 'Anlage R, Z. 25 (Kz 800)',
+    betriebsrente22: () => 'Anlage R-AV/bAV, Zeile laut Nummer der Leistungsmitteilung (meist Z. 4 oder 10)',
+    versorgungsbezuege: () => 'Anlage N, Z. 5 und Z. 11 (Kz 110, 200)',
+    versorgungsbeginn: () => 'Anlage N, Z. 13 (Kz 206)',
+    kvpv: i => `Anlage Vorsorgeaufwand, KV Z. 16 (Kz ${i ? 426 : 326}), PV Z. 18 (Kz ${i ? 429 : 329})`,
+    sonstigeVorsorge: () => 'Anlage Vorsorgeaufwand, Z. 44 bis 48 (Haftpflicht, Unfall: Z. 46)',
+    gdb: i => `Anlage ${AB}, Z. ${i ? 7 : 4} (Kz ${i ? 155 : 105})`,
+    merkG: i => `Anlage ${AB}, Z. ${i ? 8 : 5}`, merkAG: i => `Anlage ${AB}, Z. ${i ? 8 : 5}`,
+    merkH: i => `Anlage ${AB}, Z. ${i ? 9 : 6}`, merkBl: i => `Anlage ${AB}, Z. ${i ? 9 : 6}`, merkTBl: i => `Anlage ${AB}, Z. ${i ? 9 : 6}`,
+    pflegegrad: i => `Anlage ${AB}, Z. ${i ? 9 : 6} (nur Pflegegrad 4 oder 5)`,
+    pflegtAngehoerigePG: () => `Anlage ${AB}, Z. 11 bis 18 (Pflege-Pauschbetrag)`,
+    'kap-ertraege': () => 'Anlage KAP, Z. 7 (Kz 210); Günstigerprüfung Z. 4',
+    'kap-einbehalten': () => 'Anlage KAP, Z. 37 bis 39 (Kz 280 bis 282)',
+    vorauszahlungen: () => 'nicht eintragen, kennt das Finanzamt',
+    haushaltsnah: () => 'Anlage Haushaltsnahe Aufwendungen, Z. 5 (Kz 212)',
+    minijob: () => 'Anlage Haushaltsnahe Aufwendungen, Z. 4 (Kz 202)',
+    handwerker: () => 'Anlage Haushaltsnahe Aufwendungen, Z. 6 bis 9 (Summe Kz 214)',
+    'krankheit.arzt': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.zahn': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.zuzahlungen': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.hilfsmittel': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.therapie': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.kur': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.fahrten': () => `Anlage ${AB}, Z. 24 (Kz 302)`,
+    'krankheit.erstattung': () => `Anlage ${AB}, Z. 25 (Kz 303), bei Pflege Z. 28`,
+    'krankheit.pflegeAmbulant': () => `Anlage ${AB}, Z. 27 (Kz 304)`,
+    'krankheit.pflegeheim': () => `Anlage ${AB}, Z. 27 (Kz 304)`,
+    'krankheit.heimMonate': () => `Anlage ${AB}, Z. 28 (Haushaltsersparnis, Kz 305)`,
+    'krankheit.haushaltAufgeloest': () => `Anlage ${AB}, Z. 28 (Haushaltsersparnis, Kz 305)`,
+    'krankheit.umbau': () => `Anlage ${AB}, Z. 30 (Kz 306)`,
+    bestattung: () => `Anlage ${AB}, Z. 33 (Kz 310)`,
+    spenden: () => 'Anlage Sonderausgaben, Z. 5 (Kz 123)',
+    parteispenden: () => 'Anlage Sonderausgaben, Z. 7 (Kz 127)',
+    kirchensteuerGezahlt: () => 'Anlage Sonderausgaben, Z. 4 (Kz 103)',
+    kirchensteuerErstattet: () => 'Anlage Sonderausgaben, Z. 4 (Kz 104)',
+  };
+  function elsterFuer(el) {
+    if (!el) return '';
+    const key = el.dataset.k || el.dataset.a || (el.type === 'radio' ? el.name : el.id);
+    const person = /^p1-/.test(el.id) ? 1 : 0;
+    const f = ELSTER[key];
+    return f ? f(person) : '';
+  }
+
   function angabenSammeln() {
     const bloecke = [];
     SCHRITTE.forEach(sec => {
@@ -1496,11 +1552,11 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
         if (el.matches('legend[data-titel]')) { gruppe = pdfText(el.textContent); if (gruppe !== sec.dataset.titel) zeilen.push({ kopf: gruppe }); return; }
         if (el.tagName === 'H3') { const k = pdfText(el.textContent); if (k !== sec.dataset.titel) zeilen.push({ kopf: k, unter: true }); return; }
         const radio = el.querySelector('input[type=radio]:checked');
-        if (radio) { zeilen.push({ l: feldText(el), w: pdfText(el.querySelector(`label[for="${radio.id}"]`)?.textContent) }); return; }
+        if (radio) { zeilen.push({ l: feldText(el), w: pdfText(el.querySelector(`label[for="${radio.id}"]`)?.textContent), e: elsterFuer(radio) }); return; }
         const checks = [...el.querySelectorAll('input[type=checkbox]')];
         if (checks.length) {
           const an = checks.filter(c => c.checked).map(c => pdfText(c.closest('label')?.textContent));
-          if (an.length) zeilen.push({ l: feldText(el) || 'Angekreuzt', w: an.join(', ') });
+          if (an.length) zeilen.push({ l: feldText(el) || 'Angekreuzt', w: an.join(', '), e: [...new Set(checks.filter(c => c.checked).map(elsterFuer))].join('; ') });
           return;
         }
         const inp = el.querySelector('input:not([type=file]), select');
@@ -1509,7 +1565,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
         if (!w || (inp.tagName === 'SELECT' && inp.value === '0' && !feldText(el).startsWith('Kirchen'))) return;
         if (inp.tagName !== 'SELECT' && el.querySelector('.einheit')) w += ' €';
         const beleg = pdfText(el.querySelector('.belegsumme')?.textContent);
-        zeilen.push({ l: feldText(el), w: beleg ? `${w} (${beleg})` : w });
+        zeilen.push({ l: feldText(el), w: beleg ? `${w} (${beleg})` : w, e: elsterFuer(inp) });
       });
       // Überschriften ohne Werte darunter weglassen
       const stufe = z => z.kopf ? (z.unter ? 2 : 1) : 9;
@@ -1558,11 +1614,12 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
 
     const tabelle = (titel, body, spalten) => {
       doc.autoTable({
-        startY: y, margin: { left: rand, right: rand, bottom: 20 },
+        startY: y, margin: { left: rand, right: rand, bottom: 20 }, rowPageBreak: 'avoid',
         head: [[{ content: titel, colSpan: spalten, styles: { fillColor: graphit, textColor: lime, fontStyle: 'bold', fontSize: 11 } }]],
         body, theme: 'plain',
         styles: { font: 'helvetica', fontSize: 9.5, textColor: graphit, cellPadding: { top: 1.8, bottom: 1.8, left: 2, right: 2 }, lineColor: linie, lineWidth: { bottom: 0.2 } },
-        columnStyles: spalten === 2 ? { 0: { cellWidth: 105 }, 1: { halign: 'right' } } : {},
+        columnStyles: spalten === 2 ? { 0: { cellWidth: 105 }, 1: { halign: 'right' } }
+          : spalten === 3 ? { 0: { cellWidth: 72 }, 1: { halign: 'right', cellWidth: 32 }, 2: { textColor: [75, 122, 12], fontSize: 8.5 } } : {},
         didParseCell: d => { if (d.section === 'body' && d.row.raw?.kopfZeile) { d.cell.styles.fontStyle = 'bold'; d.cell.styles.fillColor = [243, 244, 241]; } },
       });
       y = doc.lastAutoTable.finalY + 8;
@@ -1570,9 +1627,12 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     const kopfZeile = (text, spalten) => { const r = [{ content: text, colSpan: spalten }]; r.kopfZeile = true; return r; };
 
     // Angaben
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...grau);
+    doc.text(doc.splitTextToSize('Grüne Angaben rechts: wo der Wert in Mein ELSTER hingehört (Formulare 2025, Z. = Zeile, Kz = Kennzahl). Bitte mit Ihren Bescheinigungen abgleichen.', B - 2 * rand), rand, y);
+    y += 10;
     angabenSammeln().forEach(b => {
-      const body = b.zeilen.map(z => z.kopf ? kopfZeile(z.kopf, 2) : [z.l, z.w]);
-      tabelle(`Angaben: ${b.titel}`, body, 2);
+      const body = b.zeilen.map(z => z.kopf ? kopfZeile(z.kopf, 3) : [z.l, z.w, z.e || '']);
+      tabelle(`Angaben: ${b.titel}`, body, 3);
     });
 
     // Belege
@@ -1580,11 +1640,11 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
       const body = BELEGE.map(b => [
         b.datum ? b.datum.split('-').reverse().join('.') : '',
         pdfText([b.aussteller, b.beschreibung].filter(Boolean).join(' – ')),
-        pdfText(FELDER[b.feld] || ''),
+        pdfText(FELDER[b.feld] || '') + (ELSTER[b.feld] ? '\n' + ELSTER[b.feld](0) : ''),
         pdfText(euro(b.betrag || 0, 2)),
       ]);
       doc.autoTable({
-        startY: y, margin: { left: rand, right: rand, bottom: 20 }, theme: 'plain',
+        startY: y, margin: { left: rand, right: rand, bottom: 20 }, theme: 'plain', rowPageBreak: 'avoid',
         head: [[{ content: 'Übernommene Belege', colSpan: 4, styles: { fillColor: graphit, textColor: lime, fontStyle: 'bold', fontSize: 11 } }],
                ['Datum', 'Aussteller / Beschreibung', 'Bereich', 'Betrag']],
         headStyles: { textColor: grau, fontSize: 8.5 },
