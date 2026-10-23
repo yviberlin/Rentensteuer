@@ -1,0 +1,1184 @@
+<title>Rentensteuer 2025</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#2a2f33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: Schritte links in einer ruhigen Spalte, Eingaben immer rechtsbündig in gleicher Breite; Ergebnis rechts mitlaufend, auf dem Handy als Leiste unten. */
+:root {
+  --bg: #f3f4f1;          /* helles Grau mit Hauch Grün */
+  --surface: #ffffff;
+  --ink: #1f2326;         /* Graphit */
+  --muted: #5d656b;
+  --line: #dde1dc;
+  --field: #f6f7f4;
+  --accent: #2a2f33;      /* Graphit für aktive Flächen */
+  --on-accent: #d6f86b;   /* Lime auf Graphit */
+  --accent-text: #4b7a0c; /* lesbares Lime-Grün für Text */
+  --accent-soft: #eef8d4;
+  --lime: #c6f24e;
+  --lime-ink: #1f2326;
+  --mark: #c6f24e;
+  --mark-ink: #1f2326;
+  --good: #2e7d3a;
+  --warn: #b4471e;
+  --font-display: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141719; --surface: #1c2023; --ink: #eceeea; --muted: #9ca4a9; --line: #2f3539; --field: #23282b;
+    --accent: #c6f24e; --on-accent: #1f2326; --accent-text: #c6f24e; --accent-soft: #283214;
+    --good: #8edb7a; --warn: #f2a07b; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141719; --surface: #1c2023; --ink: #eceeea; --muted: #9ca4a9; --line: #2f3539; --field: #23282b;
+  --accent: #c6f24e; --on-accent: #1f2326; --accent-text: #c6f24e; --accent-soft: #283214;
+  --good: #8edb7a; --warn: #f2a07b; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.5; font-weight: 500;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 96px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; }
+header.top { padding-block: 28px 20px; display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); letter-spacing: -0.01em; }
+h1 .jahr { color: var(--accent-text); }
+.sub { color: var(--muted); margin: 4px 0 0; max-width: 60ch; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; cursor: pointer; }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 8px 16px; font-size: 0.95rem; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--lime); color: var(--lime-ink); border-color: var(--lime); font-weight: 700; }
+.btn.primary:hover { filter: brightness(0.96); border-color: var(--lime); }
+:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; }
+
+.beispiel { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--r); padding: 10px 14px; margin-bottom: 20px; font-size: 0.95rem; }
+.beispiel b { color: var(--accent-text); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 28px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+form { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+fieldset { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 18px 18px 20px; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+legend { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em; padding: 0 6px; margin-left: -6px; }
+.gruppe { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.gruppe:first-of-type { border-top: 0; padding-top: 0; }
+.gruppe h3 { font-family: var(--font-body); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.felder { display: flex; flex-direction: column; }
+/* Jede Zeile: Beschriftung links, Eingabe rechts in fester Breite. So stehen alle Eingaben untereinander. */
+.feld { display: grid; grid-template-columns: minmax(0, 1fr) 200px; grid-template-areas: "label input" "hilfe input"; column-gap: 20px; row-gap: 2px; align-items: center; min-width: 0; padding-block: 12px; border-top: 1px solid var(--line); }
+.felder > .feld:first-child { border-top: 0; padding-top: 4px; }
+.feld > label, .feld > .label-text { grid-area: label; align-self: end; }
+.feld > .eingabe, .feld > .mitknopf { grid-area: input; }
+.feld > .hilfe { grid-area: hilfe; align-self: start; }
+.feld > .check, .feld > .zeile-check { grid-column: 1 / -1; }
+.feld.breit { grid-template-columns: minmax(0, 1fr); grid-template-areas: "label" "input" "hilfe"; row-gap: 6px; }
+.feld.breit > .segment { grid-area: input; justify-self: start; }
+.feld:not(:has(> .hilfe)):not(.breit) { grid-template-areas: "label input"; }
+.feld:not(:has(> .hilfe)) > label { align-self: center; }
+@media (max-width: 560px) {
+  .feld, .feld:not(:has(> .hilfe)):not(.breit) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "label" "hilfe" "input"; row-gap: 6px; }
+  .feld > .hilfe { margin-bottom: 2px; }
+}
+.feld label { font-weight: 700; font-size: 0.95rem; }
+.feld .hilfe { color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+.eingabe { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--field); min-height: 46px; }
+.eingabe:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--accent-soft); }
+.eingabe input, .eingabe select { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: inherit; padding: 10px 12px; font-variant-numeric: tabular-nums; }
+.eingabe input:focus, .eingabe select:focus { outline: none; }
+.eingabe .einheit { padding-right: 12px; color: var(--muted); }
+.eingabe input[inputmode="decimal"] { text-align: right; padding-right: 6px; }
+.mitknopf { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+.mitknopf .eingabe { flex: 1; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 0.95rem; }
+.check input { width: 22px; height: 22px; accent-color: var(--accent-text); }
+
+.segment { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--bg); gap: 2px; }
+.segment input { position: absolute; opacity: 0; pointer-events: none; }
+.segment label { padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 0.95rem; }
+.segment input:checked + label { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+.segment input:focus-visible + label { outline: 3px solid var(--accent-text); outline-offset: 1px; }
+
+details.unterpunkte { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+details.unterpunkte > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; font-weight: 700; }
+details.unterpunkte > summary::-webkit-details-marker { display: none; }
+details.unterpunkte > summary .wert { font-variant-numeric: tabular-nums; }
+details.unterpunkte > summary .pfeil { color: var(--accent-text); font-weight: 400; font-size: 0.9rem; white-space: nowrap; }
+details.unterpunkte[open] > summary { border-bottom: 1px dashed var(--line); }
+details.unterpunkte .innen { padding: 4px 14px 12px; display: flex; flex-direction: column; gap: 0; }
+details.unterpunkte .eingabe { background: var(--field); }
+details.unterpunkte .felder + .felder { border-top: 1px solid var(--line); }
+.zeile-check { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.belege-kopf { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn.gross { padding: 12px 20px; font-weight: 700; font-size: 1rem; }
+.datei-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.status { font-size: 0.95rem; color: var(--muted); }
+.status.fehler { color: var(--warn); }
+.pruefliste { display: flex; flex-direction: column; gap: 12px; }
+.pruefkarte { border: 2px solid var(--lime); border-radius: var(--r); padding: 14px; display: grid; grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap: 14px; background: var(--surface); }
+@media (max-width: 560px) { .pruefkarte { grid-template-columns: minmax(0, 1fr); } }
+.pruefkarte img { width: 100%; max-height: 180px; object-fit: contain; border-radius: 6px; background: var(--bg); }
+.pruefkarte .feld { grid-template-columns: minmax(0, 1fr) 190px; }
+.pruefkarte .aktionen { display: flex; gap: 8px; flex-wrap: wrap; grid-column: 1 / -1; }
+.pruefkarte .warnung { grid-column: 1 / -1; font-size: 0.9rem; color: var(--warn); }
+.belegliste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.belegliste li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.belegliste .titel { font-weight: 700; overflow-wrap: anywhere; }
+.belegliste small { display: block; color: var(--muted); font-size: 0.85rem; }
+.belegliste .betrag { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.btn.klein { padding: 4px 10px; font-size: 0.85rem; }
+.belegsumme { font-size: 0.85rem; color: var(--accent-text); font-weight: 700; grid-column: 1 / -1; }
+.schrittnav { display: flex; flex-direction: column; gap: 10px; }
+.fortschritt { display: flex; align-items: center; gap: 12px; }
+.schritt-zahl { font-size: 0.85rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.balken { flex: 1; height: 8px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.balken span { display: block; height: 100%; width: 0; background: var(--lime); }
+@media (prefers-reduced-motion: no-preference) { .balken span { transition: width .25s; } }
+#schrittliste { list-style: none; margin: 0; padding: 0 0 4px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; }
+#schrittliste button { white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 6px 12px; font-size: 0.85rem; }
+#schrittliste button[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
+#schrittliste button.erledigt { color: var(--ink); border-color: var(--line); background: var(--accent-soft); }
+.schritt { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.schritt-kopf h2 { font-size: clamp(1.4rem, 3.5vw, 1.8rem); }
+.schritt-kopf h2:focus { outline: none; }
+.intro { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.stapel { display: flex; flex-direction: column; gap: 18px; }
+.schritt-knoepfe { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 6px; }
+.modus { align-self: flex-start; display: inline-grid; grid-template-columns: 1fr 1fr; }
+.modus label { white-space: nowrap; text-align: center; }
+@media (max-width: 560px) { .modus { align-self: stretch; } .modus label { padding-inline: 8px; } }
+.mitknopf .eingabe { min-width: 0; }
+.mitknopf .btn { flex: none; }
+.ausgaben-schritt > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ausgaben-schritt[data-modus="eintragen"] .nur-hochladen, .ausgaben-schritt[data-modus="hochladen"] .nur-eintragen { display: none; }
+.nur-eintragen, .beleg-slot { display: flex; flex-direction: column; gap: 16px; }
+.nur-eintragen > .gruppe { border-top: 0; padding-top: 0; }
+.nur-eintragen > .gruppe > h3 { display: none; }
+.nur-eintragen > .gruppe + .gruppe { border-top: 1px dashed var(--line); padding-top: 14px; }
+.nur-eintragen > .gruppe + .gruppe > h3 { display: block; }
+.belegsumme-schritt { font-weight: 700; }
+@media (max-width: 900px) { body:not([data-schritt="ergebnis"]) aside.ergebnis { display: none; } }
+.platzhalter ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.platzhalter li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); }
+.badge { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+
+aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 900px) { aside.ergebnis { position: static; } }
+.karte { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+.summe .label { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.summe .betrag { font-family: var(--font-display); font-size: clamp(2.2rem, 6vw, 2.8rem); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 4px; }
+.summe .betrag mark { background: linear-gradient(transparent 55%, var(--mark) 55%); color: inherit; padding: 0 2px; }
+.kennzahlen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.kennzahl { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+.kennzahl span { display: block; font-size: 0.8rem; color: var(--muted); }
+.kennzahl strong { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+.saldo { margin-top: 12px; display: inline-flex; gap: 8px; align-items: center; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.saldo.erstattung { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.saldo.nachzahlung { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+
+.rechenweg h2 { font-size: 1.15rem; margin-bottom: 10px; }
+.rechenweg table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.rechenweg td { padding: 6px 0; vertical-align: top; border-bottom: 1px solid var(--line); }
+.rechenweg td.zahl { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; padding-left: 12px; }
+.rechenweg td small { display: block; color: var(--muted); font-size: 0.8rem; }
+.rechenweg tr.zwischen td { font-weight: 700; border-bottom: 2px solid var(--ink); }
+.rechenweg tr.kopf td { padding-top: 14px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 0; }
+.rechenweg tr.minus td.zahl { color: var(--muted); }
+.hinweis { font-size: 0.85rem; color: var(--muted); }
+.hinweis p { margin: 0 0 6px; }
+.notiz { font-size: 0.9rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; margin-top: 10px; }
+
+.leiste { display: none; }
+@media (max-width: 900px) {
+  .leiste { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; justify-content: space-between; align-items: center; gap: 12px;
+    background: var(--accent); color: var(--on-accent); cursor: pointer;
+    padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .leiste strong { font-family: var(--font-display); font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+  .leiste a { color: var(--on-accent); }
+}
+@media (prefers-reduced-motion: no-preference) { .summe .betrag { transition: color .2s; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Rentensteuer <span class="jahr">2025</span></h1>
+      <p class="sub">Schätzt die Einkommensteuer für Rentnerinnen und Rentner aus gesetzlicher Rente, Betriebsrente und Zinsen.</p>
+    </div>
+    <div class="toolbar">
+      <button type="button" class="btn" id="btn-beispiel">Beispiel laden</button>
+      <button type="button" class="btn" id="btn-leeren">Alles leeren</button>
+    </div>
+  </header>
+
+  <div class="beispiel" id="beispiel-hinweis"><b>Beispielwerte.</b> Die Felder zeigen einen ausgedachten Fall. Überschreiben Sie sie mit Ihren eigenen Zahlen.</div>
+
+  <div class="grid">
+    <form id="form" autocomplete="off" novalidate>
+      <nav class="schrittnav" aria-label="Schritte">
+        <div class="fortschritt"><span class="schritt-zahl" id="schritt-zahl"></span><div class="balken"><span id="balken"></span></div></div>
+        <ol id="schrittliste"></ol>
+      </nav>
+      <section class="schritt" data-schritt="haushalt" data-titel="Haushalt" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Haushalt</h2><p class="intro">Wer wird veranlagt, und fällt Kirchensteuer an?</p></div>
+      <fieldset>
+        <legend>Haushalt</legend>
+        <div class="felder">
+          <div class="feld breit">
+            <span class="label-text" id="lbl-stand"><b>Familienstand</b></span>
+            <div class="segment" role="radiogroup" aria-labelledby="lbl-stand">
+              <input type="radio" name="stand" id="stand-allein" value="allein" checked><label for="stand-allein">Alleinstehend</label>
+              <input type="radio" name="stand" id="stand-paar" value="paar"><label for="stand-paar">Verheiratet</label>
+            </div>
+            <span class="hilfe">Verheiratet heißt hier: Zusammenveranlagung mit Splittingtarif.</span>
+          </div>
+          <div class="feld breit">
+            <label for="kirche">Kirchensteuer</label>
+            <div class="eingabe"><select id="kirche">
+              <option value="0">Keine</option>
+              <option value="0.08">8 % (Bayern, Baden-Württemberg)</option>
+              <option value="0.09">9 % (übrige Bundesländer)</option>
+            </select></div>
+          </div>
+        </div>
+      </fieldset>
+      </section>
+      <section class="schritt" data-schritt="renten" data-titel="Renten" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Renten</h2><p class="intro">Tragen Sie die Renten für 2025 ein. Die Beträge stehen in der Rentenbezugsmitteilung oder der Rentenanpassungsmitteilung.</p></div>
+        <div class="stapel" id="st-rente"></div>
+      </section>
+      <section class="schritt" data-schritt="versicherungen" data-titel="Versicherungen" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Versicherungen</h2><p class="intro">Ihre Beiträge zur Kranken- und Pflegeversicherung senken die Steuer. Wenn Sie sie nicht kennen, hilft „Schätzen“.</p></div>
+        <div class="stapel" id="st-vorsorge"></div>
+      </section>
+      <section class="schritt" data-schritt="zinsen" data-titel="Zinsen" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Zinsen</h2><p class="intro">Zinsen und Dividenden aller Konten. Bis 1.000 € (Ehepaare 2.000 €) bleiben sie steuerfrei.</p></div>
+      <fieldset>
+        <legend>Zinsen und Kapitalerträge</legend>
+        <div class="felder">
+          <div class="feld">
+            <label for="kap-ertraege">Zinsen und Dividenden 2025</label>
+            <div class="eingabe"><input id="kap-ertraege" inputmode="decimal"><span class="einheit">€</span></div>
+            <span class="hilfe" id="kap-hilfe">Alle Konten zusammen, vor Steuern. Steht auf den Jahressteuerbescheinigungen der Banken.</span>
+          </div>
+          <div class="feld">
+            <label for="kap-einbehalten">Davon schon einbehaltene Steuer</label>
+            <div class="eingabe"><input id="kap-einbehalten" inputmode="decimal"><span class="einheit">€</span></div>
+            <span class="hilfe">Kapitalertragsteuer, Soli und Kirchensteuer, die die Bank abgezogen hat.</span>
+          </div>
+        </div>
+      </fieldset>
+      </section>
+      <section class="schritt" data-schritt="handwerker" data-titel="Haushalt und Handwerker" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Haushalt und Handwerker</h2><p class="intro">Tragen Sie die Arbeitskosten ein oder laden Sie die Rechnungen hoch. 20 % davon gehen direkt von der Steuer ab.</p></div>
+        <fieldset class="ausgaben-schritt" data-modus="eintragen">
+          <legend>Haushalt und Handwerker</legend>
+        <div class="segment modus" role="radiogroup" aria-label="Wie möchten Sie die Ausgaben erfassen?">
+          <input type="radio" name="modus-handwerker" id="m-handwerker-e" value="eintragen" checked><label for="m-handwerker-e">Beträge eintragen</label>
+          <input type="radio" name="modus-handwerker" id="m-handwerker-h" value="hochladen"><label for="m-handwerker-h">Beleg hochladen</label>
+        </div>
+          <div class="nur-eintragen">
+        <div class="gruppe">
+          <h3>Haushalt und Handwerker</h3>
+          <p class="hilfe" style="margin:0">Nur Arbeits-, Fahrt- und Maschinenkosten laut Rechnung, ohne Material. Nur per Überweisung oder Lastschrift bezahlt. 20 % davon gehen direkt von der Steuer ab.</p>
+          <div class="felder">
+            <div class="feld">
+              <label for="a-haushaltsnah">Haushaltsnahe Dienstleistungen</label>
+              <div class="eingabe"><input id="a-haushaltsnah" data-a="haushaltsnah" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">Reinigung, Garten, Winterdienst, Pflegedienst, Hausnotruf, Posten aus Nebenkosten- oder Hausgeldabrechnung.</span>
+            </div>
+            <div class="feld">
+              <label for="a-handwerker">Handwerkerleistungen</label>
+              <div class="eingabe"><input id="a-handwerker" data-a="handwerker" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">Reparatur, Wartung, Maler, Sanitär, Schornsteinfeger, altersgerechter Umbau.</span>
+            </div>
+            <div class="feld">
+              <label for="a-minijob">Haushaltshilfe im Minijob</label>
+              <div class="eingabe"><input id="a-minijob" data-a="minijob" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">Über die Minijob-Zentrale angemeldet.</span>
+            </div>
+          </div>
+        </div>
+
+          </div>
+          <div class="nur-hochladen beleg-slot">
+        <div class="gruppe" id="belege-gruppe">
+          <div class="belege-kopf">
+            <label class="btn primary gross" for="beleg-datei" id="beleg-knopf" hidden>Beleg fotografieren oder hochladen</label>
+            <input type="file" id="beleg-datei" class="datei-input" accept="image/*,application/pdf" multiple>
+            <span class="status" id="beleg-status" role="status"></span>
+          </div>
+          <p class="hilfe" style="margin:0" id="beleg-hinweis">Claude liest Betrag, Datum und Aussteller aus und schlägt das passende Feld vor. Sie prüfen alles, bevor es zählt. Das Foto wird nur zum Auslesen verschickt und nicht gespeichert.</p>
+          <div class="pruefliste" id="pruefliste"></div>
+          <ul class="belegliste" id="belegliste"></ul>
+        </div>
+          </div>
+        </fieldset>
+      </section>
+      <section class="schritt" data-schritt="krankheit" data-titel="Krankheitskosten" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Krankheitskosten</h2><p class="intro">Alles, was Sie für Gesundheit selbst bezahlt haben. Es zählt nur der Teil über Ihrer zumutbaren Belastung.</p></div>
+        <fieldset class="ausgaben-schritt" data-modus="eintragen">
+          <legend>Krankheitskosten</legend>
+        <div class="segment modus" role="radiogroup" aria-label="Wie möchten Sie die Ausgaben erfassen?">
+          <input type="radio" name="modus-krankheit" id="m-krankheit-e" value="eintragen" checked><label for="m-krankheit-e">Beträge eintragen</label>
+          <input type="radio" name="modus-krankheit" id="m-krankheit-h" value="hochladen"><label for="m-krankheit-h">Beleg hochladen</label>
+        </div>
+          <div class="nur-eintragen">
+        <div class="gruppe">
+          <h3>Krankheitskosten</h3>
+          <details class="unterpunkte" id="krank-details" open>
+            <summary><span>Krankheitskosten selbst getragen</span><span><span class="wert" id="krank-summe">0 €</span> <span class="pfeil" id="krank-pfeil" aria-hidden="true">▲</span></span></summary>
+            <div class="innen">
+              <div class="felder">
+                <div class="feld"><label for="k-arzt">Arzt, Krankenhaus, Reha</label><div class="eingabe"><input id="k-arzt" data-a="krankheit.arzt" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-zahn">Zahnarzt, Zahnersatz, Implantate</label><div class="eingabe"><input id="k-zahn" data-a="krankheit.zahn" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-zuzahlungen">Zuzahlungen und verordnete Medikamente</label><div class="eingabe"><input id="k-zuzahlungen" data-a="krankheit.zuzahlungen" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-hilfsmittel">Brille, Hörgerät, Rollator und andere Hilfsmittel</label><div class="eingabe"><input id="k-hilfsmittel" data-a="krankheit.hilfsmittel" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-therapie">Physiotherapie, Ergotherapie, Logopädie</label><div class="eingabe"><input id="k-therapie" data-a="krankheit.therapie" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-kur">Kur mit ärztlichem Attest</label><div class="eingabe"><input id="k-kur" data-a="krankheit.kur" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-fahrten">Fahrten zu Ärzten, Apotheken, Therapien</label><div class="eingabe"><input id="k-fahrten" data-a="krankheit.fahrten" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-pflegeAmbulant">Ambulante Pflege und Betreuung, selbst bezahlt</label><div class="eingabe"><input id="k-pflegeAmbulant" data-a="krankheit.pflegeAmbulant" inputmode="decimal"><span class="einheit">€</span></div></div>
+                <div class="feld"><label for="k-umbau">Medizinisch notwendige Umbauten</label><div class="eingabe"><input id="k-umbau" data-a="krankheit.umbau" inputmode="decimal"><span class="einheit">€</span></div><span class="hilfe">Zum Beispiel barrierefreies Bad oder Treppenlift.</span></div>
+                <div class="feld"><label for="k-erstattung">Davon erstattet</label><div class="eingabe"><input id="k-erstattung" data-a="krankheit.erstattung" inputmode="decimal"><span class="einheit">€</span></div><span class="hilfe">Von Krankenkasse, Beihilfe oder Versicherung. Wird abgezogen.</span></div>
+              </div>
+              <div class="felder">
+                <div class="feld"><label for="k-pflegeheim">Pflegeheim, selbst getragen</label><div class="eingabe"><input id="k-pflegeheim" data-a="krankheit.pflegeheim" inputmode="decimal"><span class="einheit">€</span></div><span class="hilfe">Nach Abzug der Pflegekasse. Haushaltsnahe Anteile der Heimrechnung stattdessen oben eintragen.</span></div>
+                <div class="feld"><label for="k-heimMonate">Monate im Heim 2025</label><div class="eingabe"><input id="k-heimMonate" data-a="krankheit.heimMonate" inputmode="numeric" maxlength="2" placeholder="12"></div></div>
+                <div class="feld breit"><label class="check"><input type="checkbox" id="k-haushaltAufgeloest" data-a="krankheit.haushaltAufgeloest"> Eigener Haushalt aufgelöst (dann wird die Haushaltsersparnis abgezogen)</label></div>
+              </div>
+            </div>
+          </details>
+          <span class="hilfe" id="krank-hilfe">Zählt erst über der zumutbaren Belastung. Die App rechnet sie aus.</span>
+        </div>
+
+          </div>
+          <div class="nur-hochladen beleg-slot"></div>
+        </fieldset>
+      </section>
+      <section class="schritt" data-schritt="behinderung" data-titel="Behinderung und Pflege" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Behinderung und Pflege</h2><p class="intro">Schwerbehindertenausweis, Pflegegrad oder Pflege eines Angehörigen. Daraus ergeben sich Pauschbeträge ohne Belege.</p></div>
+        <div class="stapel" id="st-behinderung"></div>
+      </section>
+      <section class="schritt" data-schritt="spenden" data-titel="Spenden und Kirchensteuer" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Spenden und Kirchensteuer</h2><p class="intro">Spenden, gezahlte Kirchensteuer und Bestattungskosten für Angehörige.</p></div>
+        <fieldset class="ausgaben-schritt" data-modus="eintragen">
+          <legend>Spenden und Kirchensteuer</legend>
+        <div class="segment modus" role="radiogroup" aria-label="Wie möchten Sie die Ausgaben erfassen?">
+          <input type="radio" name="modus-spenden" id="m-spenden-e" value="eintragen" checked><label for="m-spenden-e">Beträge eintragen</label>
+          <input type="radio" name="modus-spenden" id="m-spenden-h" value="hochladen"><label for="m-spenden-h">Beleg hochladen</label>
+        </div>
+          <div class="nur-eintragen">
+        <div class="gruppe">
+          <h3>Spenden und Kirchensteuer</h3>
+          <div class="felder">
+            <div class="feld">
+              <label for="a-spenden">Spenden und Mitgliedsbeiträge</label>
+              <div class="eingabe"><input id="a-spenden" data-a="spenden" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">An gemeinnützige Organisationen. Reine Freizeitvereine zählen nicht.</span>
+            </div>
+            <div class="feld">
+              <label for="a-parteispenden">Spenden an Parteien</label>
+              <div class="eingabe"><input id="a-parteispenden" data-a="parteispenden" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">Die Hälfte geht direkt von der Steuer ab.</span>
+            </div>
+            <div class="feld">
+              <label for="a-kirchensteuerGezahlt">2025 gezahlte Kirchensteuer</label>
+              <div class="eingabe"><input id="a-kirchensteuerGezahlt" data-a="kirchensteuerGezahlt" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">Vorauszahlungen und Nachzahlungen ans Finanzamt, nicht die von der Bank.</span>
+            </div>
+            <div class="feld">
+              <label for="a-kirchensteuerErstattet">2025 erstattete Kirchensteuer</label>
+              <div class="eingabe"><input id="a-kirchensteuerErstattet" data-a="kirchensteuerErstattet" inputmode="decimal"><span class="einheit">€</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="gruppe">
+          <h3>Weitere Belastungen</h3>
+          <div class="felder">
+            <div class="feld">
+              <label for="a-bestattung">Bestattungskosten für Angehörige</label>
+              <div class="eingabe"><input id="a-bestattung" data-a="bestattung" inputmode="decimal"><span class="einheit">€</span></div>
+              <span class="hilfe">Nur der Teil, den Erbe, Sterbegeld oder Versicherung nicht decken.</span>
+            </div>
+          </div>
+        </div>
+
+          </div>
+          <div class="nur-hochladen beleg-slot"></div>
+        </fieldset>
+      </section>
+      <section class="schritt" data-schritt="gezahlt" data-titel="Bereits gezahlt" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Bereits gezahlt</h2><p class="intro">Hat das Finanzamt 2025 schon Vorauszahlungen verlangt?</p></div>
+      <fieldset>
+        <legend>Bereits gezahlt</legend>
+        <div class="felder">
+          <div class="feld">
+            <label for="vorauszahlungen">Vorauszahlungen an das Finanzamt 2025</label>
+            <div class="eingabe"><input id="vorauszahlungen" inputmode="decimal"><span class="einheit">€</span></div>
+            <span class="hilfe">Nur falls das Finanzamt vierteljährliche Vorauszahlungen festgesetzt hat.</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="platzhalter">
+        <legend>Weitere Einkünfte und Abzüge</legend>
+        <p class="hinweis" style="margin:0">Diese Bereiche sind vorbereitet und werden als Nächstes freigeschaltet.</p>
+        <ul>
+          <li>Weiterarbeit im Ruhestand, Minijob <span class="badge">folgt</span></li>
+          <li>Vermietete Immobilie <span class="badge">folgt</span></li>
+          <li>Selbständige Arbeit, Gewerbe <span class="badge">folgt</span></li>
+          <li>Private Rentenversicherung <span class="badge">folgt</span></li>
+          <li>Riester, Rürup, freiwillige Rentenbeiträge <span class="badge">folgt</span></li>
+          <li>Energetische Sanierung des Eigenheims <span class="badge">folgt</span></li>
+          <li>Unterhalt an Angehörige <span class="badge">folgt</span></li>
+          <li>Verluste und ausländische Steuer bei Kapitalerträgen <span class="badge">folgt</span></li>
+        </ul>
+      </fieldset>
+      </section>
+      <section class="schritt" data-schritt="ergebnis" data-titel="Ergebnis" hidden>
+        <div class="schritt-kopf"><h2 tabindex="-1">Ergebnis</h2><p class="intro">Hier ist Ihre geschätzte Steuer für 2025 mit dem ganzen Rechenweg. Sie können jeden Schritt oben noch einmal öffnen und ändern.</p></div>
+
+      </section>
+      <div class="schritt-knoepfe">
+        <button type="button" class="btn" id="btn-zurueck">Zurück</button>
+        <button type="button" class="btn primary gross" id="btn-weiter">Weiter</button>
+      </div>
+    </form>
+
+    <aside class="ergebnis" aria-live="polite">
+      <div class="karte summe" id="summe"></div>
+      <div class="karte rechenweg" id="rechenweg"></div>
+      <div class="hinweis">
+        <p>Das Ergebnis ist eine Schätzung nach den Regeln für 2025 (Grundfreibetrag 12.096 €). Es ersetzt keinen Steuerbescheid und keine Steuerberatung.</p>
+        <p>Ihre Eingaben bleiben auf diesem Gerät und werden nicht verschickt.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="leiste" role="button" tabindex="0" aria-label="Zum Ergebnis">
+  <span>Steuer 2025</span>
+  <strong id="leiste-betrag">0 €</strong>
+</div>
+
+<template id="tpl-person">
+  <fieldset class="person">
+    <legend data-titel>Person</legend>
+    <div class="gruppe" data-teil="rente">
+      <div class="felder">
+        <div class="feld">
+          <label data-for="geburtsjahr">Geburtsjahr</label>
+          <div class="eingabe"><input data-k="geburtsjahr" inputmode="numeric" maxlength="4"></div>
+          <span class="hilfe">Für den Altersentlastungsbetrag.</span>
+        </div>
+      </div>
+    </div>
+    <div class="gruppe" data-teil="rente">
+      <h3>Gesetzliche Rente</h3>
+      <div class="felder">
+        <div class="feld">
+          <label data-for="gesRente">Jahresrente 2025, brutto</label>
+          <div class="eingabe"><input data-k="gesRente" inputmode="decimal"><span class="einheit">€</span></div>
+          <span class="hilfe">Bruttobetrag vor Abzug der Kranken- und Pflegeversicherung, nicht der Betrag auf dem Konto. Ohne Witwenrente.</span>
+        </div>
+        <div class="feld">
+          <label data-for="rentenbeginn">Rentenbeginn (Jahr)</label>
+          <div class="eingabe"><input data-k="rentenbeginn" inputmode="numeric" maxlength="4"></div>
+          <span class="hilfe" data-anteil>Bestimmt den steuerpflichtigen Anteil.</span>
+        </div>
+        <div class="feld">
+          <label data-for="rentenfreibetrag">Rentenfreibetrag, falls bekannt</label>
+          <div class="eingabe"><input data-k="rentenfreibetrag" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+          <span class="hilfe">Steht in einem früheren Steuerbescheid. Leer lassen, dann wird er geschätzt.</span>
+        </div>
+      </div>
+    </div>
+    <div class="gruppe" data-teil="rente">
+      <h3>Witwen- oder Witwerrente</h3>
+      <div class="felder">
+        <div class="feld">
+          <label data-for="witwenrente">Jahresbetrag 2025, brutto</label>
+          <div class="eingabe"><input data-k="witwenrente" inputmode="decimal" placeholder="falls vorhanden"><span class="einheit">€</span></div>
+          <span class="hilfe">Eigener Bescheid der Rentenversicherung. Bruttobetrag, nicht der Betrag auf dem Konto.</span>
+        </div>
+        <div class="feld">
+          <label data-for="witwenBeginn">Beginn der Witwenrente (Jahr)</label>
+          <div class="eingabe"><input data-k="witwenBeginn" inputmode="numeric" maxlength="4"></div>
+        </div>
+        <div class="feld">
+          <label data-for="vorrenteBeginn">Seit wann bekam der verstorbene Partner selbst Rente? (Jahr)</label>
+          <div class="eingabe"><input data-k="vorrenteBeginn" inputmode="numeric" maxlength="4" placeholder="optional"></div>
+          <span class="hilfe" data-witwenanteil>Dann zählt dessen Rentenbeginn für den steuerpflichtigen Anteil. Leer lassen, wenn der Partner noch keine Rente hatte.</span>
+        </div>
+        <div class="feld">
+          <label data-for="witwenFreibetrag">Rentenfreibetrag der Witwenrente, falls bekannt</label>
+          <div class="eingabe"><input data-k="witwenFreibetrag" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+          <span class="hilfe">Steht in einem früheren Steuerbescheid. Leer lassen, dann wird er geschätzt.</span>
+        </div>
+      </div>
+    </div>
+    <div class="gruppe" data-teil="rente">
+      <h3>Betriebsrente</h3>
+      <div class="felder">
+        <div class="feld">
+          <label data-for="betriebsrente22">Aus Direktversicherung, Pensionskasse oder Pensionsfonds</label>
+          <div class="eingabe"><input data-k="betriebsrente22" inputmode="decimal"><span class="einheit">€</span></div>
+          <span class="hilfe">Jahresbetrag. Wird über die Rentenbezugsmitteilung gemeldet.</span>
+        </div>
+        <div class="feld">
+          <label data-for="versorgungsbezuege">Werkspension direkt vom früheren Arbeitgeber</label>
+          <div class="eingabe"><input data-k="versorgungsbezuege" inputmode="decimal"><span class="einheit">€</span></div>
+          <span class="hilfe">Jahresbetrag laut Lohnsteuerbescheinigung.</span>
+        </div>
+        <div class="feld">
+          <label data-for="versorgungsbeginn">Beginn der Werkspension (Jahr)</label>
+          <div class="eingabe"><input data-k="versorgungsbeginn" inputmode="numeric" maxlength="4"></div>
+          <span class="hilfe">Bestimmt den Versorgungsfreibetrag.</span>
+        </div>
+      </div>
+    </div>
+    <div class="gruppe" data-teil="vorsorge">
+      <h3>Kranken- und Pflegeversicherung</h3>
+      <div class="felder">
+        <div class="feld breit">
+          <label data-for="kvpv">Eigene Beiträge 2025</label>
+          <div class="mitknopf">
+            <div class="eingabe"><input data-k="kvpv" inputmode="decimal"><span class="einheit">€</span></div>
+            <button type="button" class="btn" data-schaetzen>Schätzen</button>
+          </div>
+          <span class="hilfe">Ihr Anteil, der von Rente und Betriebsrente abgezogen wurde. „Schätzen“ rechnet für gesetzlich Versicherte mit dem durchschnittlichen Zusatzbeitrag.</span>
+        </div>
+        <div class="feld breit">
+          <label class="check"><input type="checkbox" data-k="kinderlos"> Kinderlos (höherer Beitrag)</label>
+        </div>
+        <div class="feld">
+          <label data-for="sonstigeVorsorge">Weitere Versicherungen</label>
+          <div class="eingabe"><input data-k="sonstigeVorsorge" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+          <span class="hilfe">Haftpflicht, Unfall, Kfz-Haftpflicht, Zusatzversicherungen. Wirkt meist nicht, weil die Krankenversicherung den Höchstbetrag von 1.900 € schon füllt.</span>
+        </div>
+        <div class="feld">
+          <label data-for="werbungskostenRente">Kosten rund um die Rente</label>
+          <div class="eingabe"><input data-k="werbungskostenRente" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+          <span class="hilfe">Rentenberatung, Anwalt im Rentenstreit, Anteil Steuerberatung. Zählt nur über 102 €.</span>
+        </div>
+      </div>
+    </div>
+    <div class="gruppe" data-teil="behinderung">
+      <h3>Behinderung und Pflege</h3>
+      <div class="felder">
+        <div class="feld">
+          <label data-for="gdb">Grad der Behinderung</label>
+          <div class="eingabe"><select data-k="gdb">
+            <option value="0">Keiner</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option>
+            <option value="60">60</option><option value="70">70</option><option value="80">80</option><option value="90">90</option><option value="100">100</option>
+          </select></div>
+        </div>
+        <div class="feld">
+          <label data-for="pflegegrad">Eigener Pflegegrad</label>
+          <div class="eingabe"><select data-k="pflegegrad">
+            <option value="0">Keiner</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          </select></div>
+        </div>
+        <div class="feld breit">
+          <span class="label-text"><b>Merkzeichen im Ausweis</b></span>
+          <div class="zeile-check">
+            <label class="check"><input type="checkbox" data-k="merkG"> G</label>
+            <label class="check"><input type="checkbox" data-k="merkAG"> aG</label>
+            <label class="check"><input type="checkbox" data-k="merkH"> H</label>
+            <label class="check"><input type="checkbox" data-k="merkBl"> Bl</label>
+            <label class="check"><input type="checkbox" data-k="merkTBl"> TBl</label>
+          </div>
+          <span class="hilfe" data-pausch>Daraus ergeben sich Behinderten-Pauschbetrag und Fahrtkosten-Pauschale.</span>
+        </div>
+        <div class="feld breit">
+          <label data-for="pflegtAngehoerigePG">Pflegt einen Angehörigen unentgeltlich zu Hause</label>
+          <div class="eingabe"><select data-k="pflegtAngehoerigePG">
+            <option value="0">Nein</option>
+            <option value="2">Ja, Pflegegrad 2 (600 €)</option>
+            <option value="3">Ja, Pflegegrad 3 (1.100 €)</option>
+            <option value="4">Ja, Pflegegrad 4 oder 5 oder Merkzeichen H (1.800 €)</option>
+          </select></div>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</template>
+
+<script>
+/*CORE*/
+</script>
+<script>
+(function () {
+  const BEISPIEL = {
+    stand: 'allein', kirche: '0',
+    personen: [
+      { geburtsjahr: '1958', gesRente: '18.600', rentenbeginn: '2022', rentenfreibetrag: '', betriebsrente22: '2.400', versorgungsbezuege: '', versorgungsbeginn: '', kvpv: '', kinderlos: false },
+      { geburtsjahr: '1960', gesRente: '11.400', rentenbeginn: '2024', rentenfreibetrag: '', betriebsrente22: '', versorgungsbezuege: '', versorgungsbeginn: '', kvpv: '', kinderlos: false },
+    ],
+    kap: { ertraege: '1.850', einbehalten: '224,18' },
+    ausgaben: { haushaltsnah: '480', handwerker: '1.350', 'krankheit.zahn': '1.200', 'krankheit.zuzahlungen': '310', 'krankheit.hilfsmittel': '650', 'krankheit.fahrten': '120', spenden: '200' },
+    vorauszahlungen: '',
+  };
+  const LEER = { stand: 'allein', kirche: '0', personen: [{}, {}], kap: {}, ausgaben: {}, vorauszahlungen: '' };
+  const aFelder = () => document.querySelectorAll('[data-a]');
+  const SCHRITTE = [...document.querySelectorAll('.schritt')];
+  let aktuell = 0;
+  const KEY = 'rentensteuer-2025';
+
+  const $ = s => document.querySelector(s);
+  const euro = (v, dez = 0) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: dez, maximumFractionDigits: dez }).format(v);
+  const euro2 = v => euro(v, Number.isInteger(v) ? 0 : 2);
+
+  // Deutsche Zahleneingabe: "18.600", "224,05", "1 850"
+  function zahl(s) {
+    if (s == null) return 0;
+    s = String(s).trim().replace(/\s|€/g, '');
+    if (!s) return 0;
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    const n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+  }
+  function fmtEingabe(n) { return n ? n.toLocaleString('de-DE', { maximumFractionDigits: 2 }) : ''; }
+
+  // Angaben je Person: aus der Vorlage geklont und auf die Schritte Renten, Versicherungen, Behinderung verteilt
+  const tpl = $('#tpl-person');
+  const TEILE = { rente: { ziel: '#st-rente', allein: 'Ihre Renten' }, vorsorge: { ziel: '#st-vorsorge', allein: 'Ihre Versicherungen' }, behinderung: { ziel: '#st-behinderung', allein: 'Ihre Angaben' } };
+  const karten = [0, 1].map(i => {
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    node.querySelectorAll('[data-k]').forEach(inp => { inp.id = `p${i}-${inp.dataset.k}`; });
+    node.querySelectorAll('[data-for]').forEach(l => { l.htmlFor = `p${i}-${l.dataset.for}`; });
+    const teile = {};
+    Object.entries(TEILE).forEach(([teil, info]) => {
+      const fs = document.createElement('fieldset');
+      fs.className = 'person';
+      fs.innerHTML = `<legend data-titel data-allein="${info.allein}"></legend>`;
+      node.querySelectorAll(`.gruppe[data-teil="${teil}"]`).forEach(g => fs.appendChild(g));
+      $(info.ziel).appendChild(fs);
+      teile[teil] = fs;
+    });
+    const nodes = Object.values(teile);
+    const karte = {
+      nodes,
+      querySelectorAll: sel => nodes.flatMap(n => [...n.querySelectorAll(sel)]),
+      querySelector: sel => { for (const n of nodes) { const r = n.querySelector(sel); if (r) return r; } return null; },
+      set hidden(v) { nodes.forEach(n => { n.hidden = v; }); },
+    };
+    karte.querySelector('[data-schaetzen]').addEventListener('click', () => {
+      const p = lesePerson(i);
+      karte.querySelector('[data-k="kvpv"]').value = fmtEingabe(schaetzeKvPv(p));
+      aktualisieren();
+    });
+    return karte;
+  });
+
+  function lesePerson(i) {
+    const n = karten[i], o = {};
+    n.querySelectorAll('[data-k]').forEach(inp => {
+      o[inp.dataset.k] = inp.type === 'checkbox' ? inp.checked : zahl(inp.value);
+    });
+    return o;
+  }
+  function rohPerson(i) {
+    const o = {};
+    karten[i].querySelectorAll('[data-k]').forEach(inp => { o[inp.dataset.k] = inp.type === 'checkbox' ? inp.checked : inp.value; });
+    return o;
+  }
+  function zustand() {
+    return {
+      stand: document.querySelector('input[name="stand"]:checked').value,
+      kirche: $('#kirche').value,
+      personen: [rohPerson(0), rohPerson(1)],
+      kap: { ertraege: $('#kap-ertraege').value, einbehalten: $('#kap-einbehalten').value },
+      ausgaben: Object.fromEntries([...aFelder()].map(el => [el.dataset.a, el.type === 'checkbox' ? el.checked : el.value])),
+      belege: BELEGE,
+      modus: Object.fromEntries([...document.querySelectorAll('.ausgaben-schritt')].map(fs => [fs.closest('.schritt').dataset.schritt, fs.dataset.modus])),
+      schritt: aktuell,
+      vorauszahlungen: $('#vorauszahlungen').value,
+    };
+  }
+  function setze(z) {
+    (document.getElementById(z.stand === 'paar' ? 'stand-paar' : 'stand-allein')).checked = true;
+    $('#kirche').value = z.kirche || '0';
+    [0, 1].forEach(i => {
+      const p = (z.personen && z.personen[i]) || {};
+      karten[i].querySelectorAll('[data-k]').forEach(inp => {
+        if (inp.type === 'checkbox') inp.checked = !!p[inp.dataset.k];
+        else if (inp.tagName === 'SELECT') inp.value = p[inp.dataset.k] || '0';
+        else inp.value = p[inp.dataset.k] ?? '';
+      });
+    });
+    $('#kap-ertraege').value = z.kap?.ertraege ?? '';
+    $('#kap-einbehalten').value = z.kap?.einbehalten ?? '';
+    $('#vorauszahlungen').value = z.vorauszahlungen ?? '';
+    document.querySelectorAll('.ausgaben-schritt').forEach(fs => {
+      const m = (z.modus || {})[fs.closest('.schritt').dataset.schritt] === 'hochladen' ? 'hochladen' : 'eintragen';
+      fs.dataset.modus = m;
+      fs.querySelector(`input[value="${m}"]`).checked = true;
+    });
+    BELEGE = Array.isArray(z.belege) ? z.belege.filter(b => b && typeof b === 'object').map(b => ({ ...b, id: String(b.id || neueId()) })) : [];
+    zeichneBelege();
+    aFelder().forEach(el => {
+      const v = (z.ausgaben || {})[el.dataset.a];
+      if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? '';
+    });
+  }
+
+  // "krankheit.zahn": "1.200" -> { krankheit: { zahn: 1200 } }
+  function leseAusgaben(roh = {}) {
+    const o = { krankheit: {} };
+    const setze1 = (k, wert, addieren) => {
+      const [a, b] = k.split('.');
+      const ziel = b ? (o[a] = o[a] || {}) : o, key = b || a;
+      ziel[key] = addieren ? (Number(ziel[key]) || 0) + wert : wert;
+    };
+    Object.entries(roh).forEach(([k, v]) => setze1(k, typeof v === 'boolean' ? v : zahl(v), false));
+    // Übernommene Belege kommen zu den eingetippten Beträgen dazu
+    Object.entries(belegSummen()).forEach(([k, v]) => setze1(k, v, true));
+    return o;
+  }
+
+  // ---------- Belege ----------
+  const FELDER = {
+    'haushaltsnah': 'Haushaltsnahe Dienstleistungen',
+    'handwerker': 'Handwerkerleistungen',
+    'minijob': 'Haushaltshilfe im Minijob',
+    'krankheit.arzt': 'Arzt, Krankenhaus, Reha',
+    'krankheit.zahn': 'Zahnarzt, Zahnersatz, Implantate',
+    'krankheit.zuzahlungen': 'Zuzahlungen und verordnete Medikamente',
+    'krankheit.hilfsmittel': 'Brille, Hörgerät, Hilfsmittel',
+    'krankheit.therapie': 'Physiotherapie, Ergotherapie, Logopädie',
+    'krankheit.kur': 'Kur mit ärztlichem Attest',
+    'krankheit.fahrten': 'Fahrten zu Ärzten und Therapien',
+    'krankheit.pflegeAmbulant': 'Ambulante Pflege und Betreuung',
+    'krankheit.umbau': 'Medizinisch notwendige Umbauten',
+    'krankheit.erstattung': 'Erstattung der Krankenkasse',
+    'krankheit.pflegeheim': 'Pflegeheim',
+    'spenden': 'Spenden und Mitgliedsbeiträge',
+    'parteispenden': 'Spenden an Parteien',
+    'kirchensteuerGezahlt': 'Gezahlte Kirchensteuer',
+    'bestattung': 'Bestattungskosten',
+    'keins': 'Steuerlich nicht relevant',
+  };
+  const ARBEITSKOSTEN_FELDER = ['haushaltsnah', 'handwerker'];
+  let BELEGE = [];   // übernommen: {id, datum, aussteller, beschreibung, feld, betrag, gesamt}
+  let PRUEF = [];    // wartet auf Prüfung, mit Vorschaubild (nur im Speicher)
+  const neueId = () => Math.random().toString(36).slice(2, 10);
+
+  function belegSummen() {
+    const o = {};
+    BELEGE.forEach(b => { if (b.feld && b.feld !== 'keins') o[b.feld] = (o[b.feld] || 0) + (Number(b.betrag) || 0); });
+    return o;
+  }
+
+  function escapeHtml(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function datumDe(iso) { return /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? iso.split('-').reverse().join('.') : (iso || ''); }
+
+  const SCHRITT_FELDER = {
+    handwerker: k => ['haushaltsnah', 'handwerker', 'minijob'].includes(k),
+    krankheit: k => k.startsWith('krankheit.'),
+    spenden: k => ['spenden', 'parteispenden', 'kirchensteuerGezahlt', 'bestattung'].includes(k),
+  };
+  const gehoertZu = (b, schritt) => {
+    const f = SCHRITT_FELDER[schritt];
+    if (!f) return false;
+    return b.feld === 'keins' ? b.schritt === schritt : f(b.feld);
+  };
+  function schrittKey() { return document.body.dataset.schritt || ''; }
+
+  function zeichneBelege() {
+    // Summen unter den Feldern
+    const summen = belegSummen(), anzahl = {};
+    BELEGE.forEach(b => { anzahl[b.feld] = (anzahl[b.feld] || 0) + 1; });
+    aFelder().forEach(el => {
+      const feld = el.closest('.feld'); if (!feld) return;
+      let tag = feld.querySelector('.belegsumme');
+      const k = el.dataset.a;
+      if (summen[k]) {
+        if (!tag) { tag = document.createElement('span'); tag.className = 'belegsumme'; feld.appendChild(tag); }
+        tag.textContent = `+ ${anzahl[k]} ${anzahl[k] === 1 ? 'Beleg' : 'Belege'}: ${euro2(summen[k])}`;
+      } else if (tag) tag.remove();
+    });
+    const hier = BELEGE.filter(b => gehoertZu(b, schrittKey()));
+    $('#belegliste').innerHTML = hier.map(b => `
+      <li>
+        <div><span class="titel">${escapeHtml(b.aussteller || 'Beleg')}</span>
+          <small>${escapeHtml([datumDe(b.datum), FELDER[b.feld] || b.feld].filter(Boolean).join(' · '))}</small></div>
+        <span class="betrag">${euro2(Number(b.betrag) || 0)}</span>
+        <button type="button" class="btn klein" data-loeschen="${b.id}" aria-label="Beleg ${escapeHtml(b.aussteller)} löschen">Löschen</button>
+      </li>`).join('');
+    $('#pruefliste').innerHTML = PRUEF.filter(p => p.schritt === schrittKey()).map(p => {
+      const opts = Object.entries(FELDER).map(([k, l]) => `<option value="${k}"${k === p.feld ? ' selected' : ''}>${l}</option>`).join('');
+      const warn = [];
+      if (p.datum && !p.datum.startsWith('2025')) warn.push(`Das Datum liegt nicht im Jahr 2025. Es zählt, wann bezahlt wurde.`);
+      if (p.bar) warn.push('Laut Beleg bar bezahlt. Für Handwerker und Haushaltshilfe zählt nur Überweisung oder Lastschrift.');
+      if (p.hinweis) warn.push(p.hinweis);
+      return `
+      <div class="pruefkarte" data-pruef="${p.id}">
+        ${p.vorschau ? `<img src="${p.vorschau}" alt="Vorschau des Belegs">` : '<div></div>'}
+        <div class="felder">
+          <div class="feld"><label for="pr-${p.id}-aus">Aussteller</label><div class="eingabe"><input id="pr-${p.id}-aus" data-p="aussteller" value="${escapeHtml(p.aussteller)}"></div></div>
+          <div class="feld"><label for="pr-${p.id}-dat">Datum</label><div class="eingabe"><input id="pr-${p.id}-dat" data-p="datum" type="date" value="${escapeHtml(p.datum)}"></div></div>
+          <div class="feld"><label for="pr-${p.id}-feld">Gehört zu</label><div class="eingabe"><select id="pr-${p.id}-feld" data-p="feld">${opts}</select></div></div>
+          <div class="feld"><label for="pr-${p.id}-bet">Anzusetzender Betrag</label><div class="eingabe"><input id="pr-${p.id}-bet" data-p="betrag" inputmode="decimal" value="${fmtEingabe(p.betrag)}"><span class="einheit">€</span></div>
+            <span class="hilfe">${p.gesamt ? `Rechnungsbetrag ${euro2(p.gesamt)}` : ''}${p.arbeitskosten ? `, davon Arbeitskosten ${euro2(p.arbeitskosten)}` : ''}</span></div>
+        </div>
+        ${warn.length ? `<div class="warnung">${warn.map(escapeHtml).join('<br>')}</div>` : ''}
+        <div class="aktionen">
+          <button type="button" class="btn primary" data-uebernehmen="${p.id}">Übernehmen</button>
+          <button type="button" class="btn" data-verwerfen="${p.id}">Verwerfen</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Bei Handwerkern und Haushalt zählen nur die Arbeitskosten
+  function betragFuer(p) {
+    return ARBEITSKOSTEN_FELDER.includes(p.feld) && p.arbeitskosten != null ? p.arbeitskosten : p.gesamt;
+  }
+
+  // Foto verkleinern, PDF-Seiten in Bilder umwandeln
+  async function alsBild(file) {
+    const quelle = await createImageBitmap(file);
+    return skaliere(quelle, quelle.width, quelle.height);
+  }
+  function skaliere(quelle, w, h) {
+    const max = 2000, f = Math.min(1, max / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.round(w * f); c.height = Math.round(h * f);
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(quelle, 0, 0, c.width, c.height);
+    return new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
+  }
+  function ladeSkript(src) {
+    return new Promise((ok, fehler) => {
+      const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => fehler(new Error('Skript nicht geladen'));
+      document.head.appendChild(el);
+    });
+  }
+  async function pdfAlsBilder(file, maxSeiten) {
+    if (!window.pdfjsLib) {
+      await ladeSkript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+      await ladeSkript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
+    }
+    const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+    const bilder = [];
+    for (let i = 1; i <= Math.min(pdf.numPages, maxSeiten); i++) {
+      const seite = await pdf.getPage(i);
+      const vp = seite.getViewport({ scale: 2 });
+      const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+      await seite.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      bilder.push(await skaliere(c, c.width, c.height));
+    }
+    return bilder;
+  }
+
+  const AUFTRAG = `Du liest einen deutschen Beleg (Rechnung, Quittung, Kassenbon, Bescheinigung) für die Einkommensteuererklärung 2025 einer Rentnerin oder eines Rentners aus.
+Die Bilder zeigen die Seiten EINES Belegs.
+Antworte nur mit JSON in dieser Form:
+{"aussteller":"Name der Firma oder Praxis","datum":"YYYY-MM-DD oder null","beschreibung":"kurz, was bezahlt wurde","gesamtbetrag":123.45,"arbeitskosten":null,"bar_bezahlt":false,"feld":"handwerker","hinweis":null}
+Regeln:
+- gesamtbetrag: der Endbetrag, den die Person selbst bezahlt hat, in Euro als Zahl (brutto, inklusive Mehrwertsteuer).
+- arbeitskosten: nur bei Handwerkern und Dienstleistungen im Haushalt die Arbeits-, Fahrt- und Maschinenkosten inklusive Mehrwertsteuer, ohne Material. Wenn nicht ausgewiesen: null.
+- datum: Zahlungs- oder Rechnungsdatum.
+- bar_bezahlt: true nur, wenn der Beleg Barzahlung zeigt; sonst false.
+- feld: genau einer dieser Schlüssel: ${Object.entries(FELDER).map(([k, l]) => k + ' (' + l + ')').join(', ')}.
+- hinweis: ein kurzer Satz auf Deutsch, wenn etwas unklar ist (zum Beispiel unleserlicher Betrag oder Erstattung möglich), sonst null.
+Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erkannt."}.`;
+
+  let sample = null, bildLimits = null;
+  async function belegeVorbereiten() {
+    try { sample = window.claude?.use ? await window.claude.use('sample') : null; } catch (e) { sample = null; }
+    if (sample) { try { bildLimits = (await sample.limits())?.images || null; } catch (e) { bildLimits = null; } }
+    const geht = !!(sample && bildLimits);
+    $('#beleg-knopf').hidden = !geht;
+    if (!geht) $('#beleg-hinweis').textContent = 'Belege per Foto auslesen funktioniert, wenn die App in claude.ai oder in der Claude-App geöffnet ist. Beträge lassen sich unten trotzdem von Hand eintragen.';
+    // Ohne Auslese-Funktion (z. B. als installierte App) und ohne gespeicherte Belege: nur Eintragen anbieten.
+    if (!geht && !BELEGE.length) {
+      document.querySelectorAll('.ausgaben-schritt').forEach(fs => {
+        fs.dataset.modus = 'eintragen';
+        fs.querySelector('.modus').hidden = true;
+        const r = fs.querySelector('.modus input[value="eintragen"]'); if (r) r.checked = true;
+      });
+    }
+  }
+
+  function status(text, fehler = false) { const el = $('#beleg-status'); el.textContent = text; el.classList.toggle('fehler', fehler); }
+
+  async function belegAuslesen(file) {
+    const maxBilder = Math.min(bildLimits?.maxCount || 1, 3);
+    const bilder = file.type === 'application/pdf' ? await pdfAlsBilder(file, maxBilder) : [await alsBild(file)];
+    const bereich = SCHRITTE[aktuell]?.dataset.titel || '';
+    const antwort = await sample.json(AUFTRAG + `\nDer Beleg wurde im Bereich „${bereich}“ hochgeladen.`, { images: bilder, modelTier: 'default', cache: false });
+    const n = v => (typeof v === 'number' && isFinite(v)) ? Math.round(v * 100) / 100 : (typeof v === 'string' ? zahl(v) : null);
+    const p = {
+      id: neueId(),
+      aussteller: String(antwort?.aussteller || '').slice(0, 80),
+      datum: /^\d{4}-\d{2}-\d{2}$/.test(antwort?.datum || '') ? antwort.datum : '',
+      beschreibung: String(antwort?.beschreibung || '').slice(0, 120),
+      gesamt: n(antwort?.gesamtbetrag) || 0,
+      arbeitskosten: antwort?.arbeitskosten == null ? null : n(antwort.arbeitskosten),
+      bar: antwort?.bar_bezahlt === true,
+      feld: FELDER[antwort?.feld] ? antwort.feld : 'keins',
+      hinweis: antwort?.hinweis ? String(antwort.hinweis).slice(0, 200) : '',
+      vorschau: URL.createObjectURL(bilder[0]),
+      schritt: schrittKey(),
+    };
+    p.betrag = betragFuer(p);
+    return p;
+  }
+
+  $('#beleg-datei').addEventListener('change', async e => {
+    const dateien = [...e.target.files]; e.target.value = '';
+    if (!dateien.length || !sample) return;
+    let fertig = 0;
+    for (const file of dateien) {
+      status(`Lese Beleg ${fertig + 1} von ${dateien.length} …`);
+      try { PRUEF.push(await belegAuslesen(file)); fertig++; zeichneBelege(); }
+      catch (err) {
+        const code = err?.code;
+        const text = code === 'not_granted' || code === 'sampling_disabled' ? 'Claude darf in dieser App nicht genutzt werden. Bitte die Freigabe erlauben.'
+          : code === 'rate_limited' ? 'Gerade zu viele Anfragen. Bitte in ein paar Minuten noch einmal versuchen.'
+          : code === 'image_rejected' ? 'Diese Datei konnte nicht gelesen werden. Bitte ein anderes Foto versuchen.'
+          : code === 'invalid_json' || code === 'empty_completion' ? 'Der Beleg ließ sich nicht auslesen. Bitte ein schärferes Foto versuchen oder den Betrag von Hand eintragen.'
+          : code === 'session_expired' ? 'Bitte bei claude.ai neu anmelden.'
+          : 'Das Auslesen hat nicht geklappt. Bitte noch einmal versuchen.';
+        status(text, true);
+        if (['not_granted', 'sampling_disabled', 'rate_limited', 'session_expired'].includes(code)) break;
+      }
+    }
+    if (fertig) status(fertig === 1 ? 'Beleg gelesen. Bitte prüfen und übernehmen.' : `${fertig} Belege gelesen. Bitte prüfen und übernehmen.`);
+  });
+
+  $('#belege-gruppe').addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.uebernehmen) {
+      const karte = t.closest('[data-pruef]'), p = PRUEF.find(x => x.id === t.dataset.uebernehmen);
+      const wert = k => karte.querySelector(`[data-p="${k}"]`).value;
+      BELEGE.push({ id: p.id, schritt: p.schritt, aussteller: wert('aussteller'), datum: wert('datum'), beschreibung: p.beschreibung, feld: wert('feld'), betrag: zahl(wert('betrag')), gesamt: p.gesamt });
+      URL.revokeObjectURL(p.vorschau);
+      PRUEF = PRUEF.filter(x => x !== p);
+      status('Beleg übernommen.');
+      $('#beispiel-hinweis').hidden = true;
+      zeichneBelege(); aktualisieren();
+    } else if (t.dataset.verwerfen) {
+      const p = PRUEF.find(x => x.id === t.dataset.verwerfen);
+      if (p) URL.revokeObjectURL(p.vorschau);
+      PRUEF = PRUEF.filter(x => x !== p);
+      status(''); zeichneBelege();
+    } else if (t.dataset.loeschen) {
+      BELEGE = BELEGE.filter(b => b.id !== t.dataset.loeschen);
+      zeichneBelege(); aktualisieren();
+    }
+  });
+  // Feldwechsel in der Prüfliste: Betrag für Handwerker auf Arbeitskosten umstellen
+  $('#pruefliste').addEventListener('change', e => {
+    if (e.target.dataset.p !== 'feld') return;
+    const karte = e.target.closest('[data-pruef]'), p = PRUEF.find(x => x.id === karte.dataset.pruef);
+    p.feld = e.target.value;
+    karte.querySelector('[data-p="betrag"]').value = fmtEingabe(betragFuer(p));
+  });
+
+  function zeile(label, betrag, cls = '', detail = '') {
+    return `<tr class="${cls}"><td>${label}${detail ? `<small>${detail}</small>` : ''}</td><td class="zahl">${betrag}</td></tr>`;
+  }
+
+  function aktualisieren(speichern = true) {
+    const z = zustand();
+    const paar = z.stand === 'paar';
+    karten[1].hidden = !paar;
+    karten.forEach((k, i) => k.querySelectorAll('[data-titel]').forEach(l => { l.textContent = paar ? `Person ${i + 1}` : l.dataset.allein; }));
+    $('#kap-hilfe').textContent = paar
+      ? 'Beide Partner zusammen, vor Steuern. Steht auf den Jahressteuerbescheinigungen der Banken.'
+      : 'Alle Konten zusammen, vor Steuern. Steht auf den Jahressteuerbescheinigungen der Banken.';
+
+    karten.forEach((k, i) => {
+      const pp = lesePerson(i);
+      const bp = behindertenPauschbetrag(pp), fp = fahrtkostenPauschale(pp);
+      k.querySelector('[data-pausch]').textContent = bp || fp
+        ? `Behinderten-Pauschbetrag ${euro(bp)}` + (fp ? `, Fahrtkosten-Pauschale ${euro(fp)}` : '') + '.'
+        : 'Daraus ergeben sich Behinderten-Pauschbetrag und Fahrtkosten-Pauschale.';
+      const wb = pp.witwenBeginn, vr = pp.vorrenteBeginn;
+      const wj = vr > 0 && vr < wb ? Math.max(2005, vr) : wb;
+      k.querySelector('[data-witwenanteil]').textContent = pp.witwenrente > 0 && wj >= 1950 && wj <= 2025
+        ? `Steuerpflichtiger Anteil der Witwenrente: ${(besteuerungsanteil(wj) * 100).toLocaleString('de-DE')} %` + (wj !== wb ? ` (nach Rentenbeginn des Partners ${wj})` : '')
+        : 'Dann zählt dessen Rentenbeginn für den steuerpflichtigen Anteil. Leer lassen, wenn der Partner noch keine Rente hatte.';
+      const beginn = zahl(k.querySelector('[data-k="rentenbeginn"]').value);
+      const el = k.querySelector('[data-anteil]');
+      el.textContent = beginn >= 1950 && beginn <= 2025
+        ? `Steuerpflichtiger Anteil: ${(besteuerungsanteil(beginn) * 100).toLocaleString('de-DE')} %`
+        : 'Bestimmt den steuerpflichtigen Anteil.';
+    });
+
+    const eingabe = {
+      verheiratet: paar,
+      kirchensteuer: Number(z.kirche),
+      personen: [lesePerson(0), lesePerson(1)],
+      kapital: { ertraege: zahl(z.kap.ertraege), einbehalten: zahl(z.kap.einbehalten) },
+      vorauszahlungen: zahl(z.vorauszahlungen),
+      ausgaben: leseAusgaben(z.ausgaben),
+    };
+    // Fehlende KV-Beiträge: Schätzung verwenden und kennzeichnen
+    const geschaetzt = [];
+    eingabe.personen.forEach((p, i) => { if (!p.kvpv && (p.gesRente || p.witwenrente || p.betriebsrente22 || p.versorgungsbezuege)) { p.kvpv = schaetzeKvPv(p); geschaetzt.push(i); } });
+
+    const r = berechne(eingabe);
+    $('#krank-summe').textContent = euro(r.agB.krankheit + r.agB.heim);
+    $('#krank-pfeil').textContent = $('#krank-details').open ? '▲' : '▼';
+    $('#krank-hilfe').textContent = r.agB.summe > 0
+      ? `Ihre zumutbare Belastung liegt bei ${euro(r.agB.zumutbar)}. ` + (r.agB.abzug > 0 ? `Davon abziehbar: ${euro(r.agB.abzug)}.` : 'Ihre Kosten liegen darunter und wirken sich nicht aus.')
+      : 'Zählt erst über der zumutbaren Belastung. Die App rechnet sie aus.';
+    zeichne(r, geschaetzt.filter(i => paar || i === 0).length > 0);
+    if (speichern) { try { localStorage.setItem(KEY, JSON.stringify(z)); } catch (e) {} }
+  }
+
+  function zeichne(r, kvGeschaetzt) {
+    const kapSteuer = r.kapSteuer.est + r.kapSteuer.soli + r.kapSteuer.kist;
+    let saldo = '';
+    if (r.vorauszahlungen > 0 || r.kapital.einbehalten > 0) {
+      saldo = r.saldo <= 0
+        ? `<div class="saldo erstattung">Voraussichtliche Erstattung ${euro2(-r.saldo)}</div>`
+        : `<div class="saldo nachzahlung">Voraussichtliche Nachzahlung ${euro2(r.saldo)}</div>`;
+    }
+    $('#summe').innerHTML = `
+      <div class="label">Steuer für 2025 insgesamt</div>
+      <div class="betrag"><mark>${euro2(r.gesamt)}</mark></div>
+      ${saldo}
+      <div class="kennzahlen">
+        <div class="kennzahl"><span>Pro Monat</span><strong>${euro2(r.monatlich)}</strong></div>
+        <div class="kennzahl"><span>Anteil am Einkommen</span><strong>${(r.durchschnittssatz * 100).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} %</strong></div>
+        <div class="kennzahl"><span>Zu versteuerndes Einkommen</span><strong>${euro(r.zvE)}</strong></div>
+        <div class="kennzahl"><span>Einkommen brutto</span><strong>${euro(r.einkommenBrutto)}</strong></div>
+      </div>`;
+    $('#leiste-betrag').textContent = euro2(r.gesamt);
+
+    let t = '';
+    r.personen.forEach((p, i) => {
+      if (r.splitting) t += `<tr class="kopf"><td colspan="2">Person ${i + 1}</td></tr>`;
+      p.zeilen.forEach(z => {
+        if (z.art === 'wk22') t += zeile(z.label, '− ' + euro(z.abzug), 'minus');
+        else t += zeile(z.label, euro(z.brutto - z.abzug), '', z.abzug ? `${euro(z.brutto)} brutto, davon frei ${euro(z.abzug)}. ${z.detail}` : `${euro(z.brutto)} brutto. ${z.detail}`);
+      });
+    });
+    if (r.kapital.guenstiger) {
+      t += zeile('Zinsen und Kapitalerträge', euro(r.kapital.einkuenfte), '', `${euro(r.kapital.ertraege)} abzüglich Sparer-Pauschbetrag ${euro(r.kapital.pauschbetrag)}. Mit Ihrem persönlichen Steuersatz günstiger als 25 %.`);
+    }
+    t += zeile('Summe der Einkünfte', euro(r.summeEinkuenfte), 'zwischen');
+    if (r.altersentlastung) t += zeile('Altersentlastungsbetrag', '− ' + euro(r.altersentlastung), 'minus');
+    t += zeile('Kranken- und Pflegeversicherung', '− ' + euro(r.vorsorge), 'minus', kvGeschaetzt ? 'Teilweise geschätzt, weil kein Betrag eingetragen ist.' : '');
+    if (r.sonderausgaben > r.sonderPausch) {
+      const teile = [];
+      if (r.sonder.spenden) teile.push(`Spenden ${euro(r.sonder.spenden)}` + (r.sonder.spenden < r.sonder.spendenEingabe ? ' (gekappt auf 20 %)' : ''));
+      if (r.sonder.parteiSonder) teile.push(`Parteispenden ${euro(r.sonder.parteiSonder)}`);
+      if (r.sonder.kirchensteuer) teile.push(`Kirchensteuer ${euro(r.sonder.kirchensteuer)}`);
+      t += zeile('Spenden und Kirchensteuer', '− ' + euro(r.sonderausgaben), 'minus', teile.join(', '));
+    } else t += zeile('Sonderausgaben-Pauschbetrag', '− ' + euro(r.sonderausgaben), 'minus', r.sonder.tatsaechlich ? 'Ihre Spenden und Kirchensteuer liegen darunter.' : '');
+    if (r.agB.summe > 0) {
+      const teile = [];
+      if (r.agB.krankheit) teile.push(`Krankheitskosten ${euro(r.agB.krankheit)}`);
+      if (r.agB.heim) teile.push(`Pflegeheim ${euro(r.agB.heim)}` + (r.agB.haushaltsersparnis ? ` nach Haushaltsersparnis ${euro(r.agB.haushaltsersparnis)}` : ''));
+      if (r.agB.fahrtPausch) teile.push(`Fahrtkosten-Pauschale ${euro(r.agB.fahrtPausch)}`);
+      if (r.agB.bestattung) teile.push(`Bestattung ${euro(r.agB.bestattung)}`);
+      t += zeile('Außergewöhnliche Belastungen', '− ' + euro(r.agB.abzug), 'minus', `${teile.join(', ')}. Abzüglich zumutbarer Belastung ${euro(r.agB.zumutbar)}.`);
+    }
+    if (r.behinderung) t += zeile('Behinderten-Pauschbetrag', '− ' + euro(r.behinderung), 'minus');
+    if (r.pflege) t += zeile('Pflege-Pauschbetrag', '− ' + euro(r.pflege), 'minus');
+    t += zeile('Zu versteuerndes Einkommen', euro(r.zvE), 'zwischen');
+    const tarifText = r.splitting ? 'Splittingtarif 2025' : 'Grundtarif 2025';
+    if (r.ermaessigung) {
+      t += zeile('Einkommensteuer laut Tarif', euro2(r.estTarif), '', tarifText);
+      if (r.erm.partei) t += zeile('Ermäßigung für Parteispenden', '− ' + euro2(r.erm.partei), 'minus');
+      if (r.erm.haushalt35a) {
+        const ei = r.erm.einzeln, teile = [];
+        if (ei.haushalt) teile.push(`Haushalt ${euro(ei.haushalt)}`);
+        if (ei.minijob) teile.push(`Minijob ${euro(ei.minijob)}`);
+        if (ei.handwerker) teile.push(`Handwerker ${euro(ei.handwerker)}`);
+        t += zeile('Ermäßigung für Haushalt und Handwerker', '− ' + euro2(r.erm.haushalt35a), 'minus', '20 % der Arbeitskosten: ' + teile.join(', '));
+      }
+      t += zeile('Einkommensteuer', euro2(r.est));
+    } else t += zeile('Einkommensteuer', euro2(r.est), '', tarifText);
+    t += zeile('Solidaritätszuschlag', euro2(r.soli), '', r.soli ? '' : 'Fällt erst ab höheren Steuerbeträgen an.');
+    if (r.kist) t += zeile('Kirchensteuer', euro2(r.kist));
+    if (r.kapital.einkuenfte > 0 && !r.kapital.guenstiger) {
+      t += `<tr class="kopf"><td colspan="2">Zinsen und Kapitalerträge</td></tr>`;
+      t += zeile('Abgeltungsteuer 25 % mit Soli' + (r.kapSteuer.kist ? ' und Kirchensteuer' : ''), euro2(kapSteuer), '',
+        `${euro(r.kapital.ertraege)} abzüglich Sparer-Pauschbetrag ${euro(r.kapital.pauschbetrag)}`);
+    }
+    t += zeile('Steuer insgesamt', euro2(r.gesamt), 'zwischen');
+    if (r.kapital.einbehalten) t += zeile('Von der Bank schon einbehalten', '− ' + euro2(r.kapital.einbehalten), 'minus');
+    if (r.vorauszahlungen) t += zeile('Vorauszahlungen', '− ' + euro2(r.vorauszahlungen), 'minus');
+
+    let notiz = '';
+    const verfallen = (r.erm.haushalt35aVoll - r.erm.haushalt35a) + (r.erm.parteiVoll - r.erm.partei);
+    if (verfallen > 0) notiz += `<div class="notiz">${euro(verfallen)} der Ermäßigung für Haushalt, Handwerker oder Parteispenden verfallen, weil die Einkommensteuer schon bei null ist.</div>`;
+    if (r.kapital.guenstiger) notiz += `<div class="notiz">Günstigerprüfung: Ihre Zinsen werden mit Ihrem persönlichen Steuersatz besteuert statt mit 25 %. Das spart etwa ${euro(r.kapital.ersparnisGuenstiger)}. Dafür die Anlage KAP abgeben und die Günstigerprüfung ankreuzen.</div>`;
+    else if (r.kapital.ertraege > 0 && r.kapital.einkuenfte === 0) notiz += `<div class="notiz">Ihre Zinsen liegen unter dem Sparer-Pauschbetrag und bleiben steuerfrei.</div>`;
+
+    $('#rechenweg').innerHTML = `<h2>So wird gerechnet</h2><div style="overflow-x:auto"><table>${t}</table></div>${notiz}`;
+  }
+
+  // Ereignisse
+  $('#form').addEventListener('input', () => { $('#beispiel-hinweis').hidden = true; aktualisieren(); });
+  $('#form').addEventListener('change', () => aktualisieren());
+  $('#form').addEventListener('submit', e => e.preventDefault());
+  $('#krank-details').addEventListener('toggle', () => { $('#krank-pfeil').textContent = $('#krank-details').open ? '▲' : '▼'; });
+  $('#btn-beispiel').addEventListener('click', () => { setze(BEISPIEL); $('#beispiel-hinweis').hidden = false; aktualisieren(); });
+  $('#btn-leeren').addEventListener('click', () => { setze(LEER); $('#beispiel-hinweis').hidden = true; aktualisieren(); });
+
+  // Start: gespeicherte Eingaben oder Beispiel
+  let gespeichert = null;
+  try { gespeichert = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  if (gespeichert) { setze(gespeichert); $('#beispiel-hinweis').hidden = true; }
+  else setze(BEISPIEL);
+  // ---------- Schritte ----------
+  function zeigeSchritt(n, fokus = true) {
+    aktuell = Math.max(0, Math.min(SCHRITTE.length - 1, n));
+    const s = SCHRITTE[aktuell];
+    SCHRITTE.forEach((x, i) => { x.hidden = i !== aktuell; });
+    document.body.dataset.schritt = s.dataset.schritt;
+    $('#schritt-zahl').textContent = `Schritt ${aktuell + 1} von ${SCHRITTE.length}`;
+    $('#balken').style.width = `${((aktuell + 1) / SCHRITTE.length) * 100}%`;
+    $('#schrittliste').querySelectorAll('button').forEach((b, i) => {
+      if (i === aktuell) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+      b.classList.toggle('erledigt', i < aktuell);
+    });
+    const aktiv = $('#schrittliste').querySelector('[aria-current]');
+    if (aktiv) aktiv.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    $('#btn-zurueck').hidden = aktuell === 0;
+    const naechster = SCHRITTE[aktuell + 1];
+    $('#btn-weiter').hidden = !naechster;
+    if (naechster) $('#btn-weiter').textContent = naechster.dataset.schritt === 'ergebnis' ? 'Ergebnis anzeigen' : `Weiter: ${naechster.dataset.titel}`;
+    const slot = s.querySelector('.beleg-slot');
+    if (slot) slot.appendChild($('#belege-gruppe'));
+    zeichneBelege();
+    try { const z = JSON.parse(localStorage.getItem(KEY) || '{}'); z.schritt = aktuell; localStorage.setItem(KEY, JSON.stringify(z)); } catch (e) {}
+    if (fokus) {
+      $('.schrittnav').scrollIntoView({ block: 'start' });
+      s.querySelector('h2').focus({ preventScroll: true });
+    }
+  }
+  $('#schrittliste').innerHTML = SCHRITTE.map((s, i) => `<li><button type="button" data-geh="${i}">${i + 1}. ${s.dataset.titel}</button></li>`).join('');
+  $('#schrittliste').addEventListener('click', e => { const b = e.target.closest('[data-geh]'); if (b) zeigeSchritt(Number(b.dataset.geh)); });
+  $('#btn-weiter').addEventListener('click', () => zeigeSchritt(aktuell + 1));
+  $('#btn-zurueck').addEventListener('click', () => zeigeSchritt(aktuell - 1));
+  $('.leiste').addEventListener('click', () => zeigeSchritt(SCHRITTE.length - 1));
+  document.querySelectorAll('.ausgaben-schritt .modus').forEach(m => m.addEventListener('change', e => {
+    e.target.closest('.ausgaben-schritt').dataset.modus = e.target.value;
+    aktualisieren();
+  }));
+
+  aktualisieren(false);
+  zeigeSchritt(Number(gespeichert?.schritt) || 0, false);
+  belegeVorbereiten();
+})();
+</script>
