@@ -10,6 +10,8 @@ kopf, rumpf = t[:style_end], t[style_end:]
 kopf = re.sub(r'<title>.*?</title>\n?|<meta name="(claude:viewport-fit-sides|theme-color)"[^>]*>\n?', '', kopf)
 # Schrift liegt in der App selbst (offline nutzbar, keine Verbindung zu Google).
 kopf = re.sub(r'<link rel="(preconnect|stylesheet)" href="https://fonts\.[^"]*"[^>]*>\n?', '', kopf)
+rumpf = rumpf.replace('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'vendor/jspdf.umd.min.js') \
+             .replace('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js', 'vendor/jspdf.plugin.autotable.min.js')
 kopf = kopf.replace('<style>', '<style>\n' + open('src/fonts.css').read(), 1)
 seite = f'''<!doctype html>
 <html lang="de">
@@ -61,7 +63,8 @@ open('docs/manifest.webmanifest', 'w').write(json.dumps(manifest, ensure_ascii=F
 # Versionsnummer aus dem Inhalt: jede Änderung lädt beim nächsten Start neu.
 dateien = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png',
            'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png',
-           'fonts/manrope-latin.woff2', 'fonts/manrope-latin-ext.woff2']
+           'fonts/manrope-latin.woff2', 'fonts/manrope-latin-ext.woff2',
+           'vendor/jspdf.umd.min.js', 'vendor/jspdf.plugin.autotable.min.js']
 h = hashlib.sha256()
 for d in dateien[1:]:
     h.update(open('docs/' + d, 'rb').read())

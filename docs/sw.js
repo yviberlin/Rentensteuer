@@ -1,8 +1,8 @@
 // Service Worker: macht die App offline nutzbar.
 // Eigene Dateien: erst aus dem Speicher, im Hintergrund aktualisieren.
 // pdf.js (nur fürs Belege-Auslesen) wird beim ersten Laden mitgespeichert.
-const CACHE = 'rentensteuer-bf9402fbb8';
-const DATEIEN = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png", "fonts/manrope-latin.woff2", "fonts/manrope-latin-ext.woff2"];
+const CACHE = 'rentensteuer-b16c78b4dd';
+const DATEIEN = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png", "fonts/manrope-latin.woff2", "fonts/manrope-latin-ext.woff2", "vendor/jspdf.umd.min.js", "vendor/jspdf.plugin.autotable.min.js"];
 const FREMD = ['cdnjs.cloudflare.com'];
 
 self.addEventListener('install', e => {

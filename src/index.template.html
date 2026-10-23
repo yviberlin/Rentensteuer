@@ -194,6 +194,10 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
 .rechenweg tr.zwischen td { font-weight: 700; border-bottom: 2px solid var(--ink); }
 .rechenweg tr.kopf td { padding-top: 14px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 0; }
 .rechenweg tr.minus td.zahl { color: var(--muted); }
+.pdf-export { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pdf-export h3 { margin: 0; }
+.pdf-export .hilfe { margin: 0; }
+#pdf-status:empty { display: none; }
 .hinweis { font-size: 0.85rem; color: var(--muted); }
 .hinweis p { margin: 0 0 6px; }
 .notiz { font-size: 0.9rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; margin-top: 10px; }
@@ -447,6 +451,12 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
       </section>
       <section class="schritt" data-schritt="ergebnis" data-titel="Ergebnis" hidden>
         <div class="schritt-kopf"><h2 tabindex="-1">Ergebnis</h2><p class="intro">Hier ist Ihre geschätzte Steuer für 2025 mit dem ganzen Rechenweg. Sie können jeden Schritt oben noch einmal öffnen und ändern.</p></div>
+        <div class="gruppe pdf-export">
+          <h3>Als PDF speichern</h3>
+          <p class="hilfe">Alle Angaben, Belege und der Rechenweg in einer Datei, zum Ablegen oder für die Steuererklärung.</p>
+          <div><button type="button" class="btn primary" id="btn-pdf">PDF herunterladen</button></div>
+          <p class="hilfe" id="pdf-status" role="status"></p>
+        </div>
 
       </section>
       <div class="schritt-knoepfe">
@@ -1126,6 +1136,174 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
 
     $('#rechenweg').innerHTML = `<h2>So wird gerechnet</h2><div style="overflow-x:auto"><table>${t}</table></div>${notiz}`;
   }
+
+  // PDF-Export: liest Angaben, Belege und Rechenweg aus der Seite und baut daraus ein PDF.
+  const PDF_SKRIPTE = ['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+                       'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'];
+  const pdfText = s => String(s ?? '').replace(/[−–]/g, '-').replace(/[  ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const sichtbarIn = (el, grenze) => { for (let n = el; n && n !== grenze; n = n.parentElement) if (n.hidden) return false; return true; };
+
+  function feldText(feld) {
+    const lab = feld.querySelector('label:not(.check), .label-text');
+    return pdfText(lab ? lab.textContent : '');
+  }
+  function angabenSammeln() {
+    const bloecke = [];
+    SCHRITTE.forEach(sec => {
+      if (sec.dataset.schritt === 'ergebnis') return;
+      const zeilen = [];
+      let gruppe = '';
+      sec.querySelectorAll('legend[data-titel], h3, .feld').forEach(el => {
+        if (!sichtbarIn(el, sec)) return;
+        if (el.matches('legend[data-titel]')) { gruppe = pdfText(el.textContent); if (gruppe !== sec.dataset.titel) zeilen.push({ kopf: gruppe }); return; }
+        if (el.tagName === 'H3') { const k = pdfText(el.textContent); if (k !== sec.dataset.titel) zeilen.push({ kopf: k, unter: true }); return; }
+        const radio = el.querySelector('input[type=radio]:checked');
+        if (radio) { zeilen.push({ l: feldText(el), w: pdfText(el.querySelector(`label[for="${radio.id}"]`)?.textContent) }); return; }
+        const checks = [...el.querySelectorAll('input[type=checkbox]')];
+        if (checks.length) {
+          const an = checks.filter(c => c.checked).map(c => pdfText(c.closest('label')?.textContent));
+          if (an.length) zeilen.push({ l: feldText(el) || 'Angekreuzt', w: an.join(', ') });
+          return;
+        }
+        const inp = el.querySelector('input:not([type=file]), select');
+        if (!inp) return;
+        let w = inp.tagName === 'SELECT' ? pdfText(inp.selectedOptions[0]?.textContent) : pdfText(inp.value);
+        if (!w || (inp.tagName === 'SELECT' && inp.value === '0' && !feldText(el).startsWith('Kirchen'))) return;
+        if (inp.tagName !== 'SELECT' && el.querySelector('.einheit')) w += ' €';
+        const beleg = pdfText(el.querySelector('.belegsumme')?.textContent);
+        zeilen.push({ l: feldText(el), w: beleg ? `${w} (${beleg})` : w });
+      });
+      // Überschriften ohne Werte darunter weglassen
+      const stufe = z => z.kopf ? (z.unter ? 2 : 1) : 9;
+      const sauber = zeilen.filter((z, i) => {
+        if (!z.kopf) return true;
+        for (const n of zeilen.slice(i + 1)) { if (!n.kopf) return true; if (stufe(n) <= stufe(z)) return false; }
+        return false;
+      });
+      if (sauber.some(z => !z.kopf)) bloecke.push({ titel: sec.dataset.titel, zeilen: sauber });
+    });
+    return bloecke;
+  }
+  function rechenwegSammeln() {
+    return [...document.querySelectorAll('#rechenweg tr')].map(tr => {
+      const tds = tr.querySelectorAll('td');
+      if (tr.classList.contains('kopf')) return { kopf: pdfText(tds[0].textContent) };
+      const klein = tds[0].querySelector('small');
+      const label = pdfText([...tds[0].childNodes].filter(n => n !== klein).map(n => n.textContent).join(' '));
+      return { l: label, d: klein ? pdfText(klein.textContent) : '', w: pdfText(tds[1]?.textContent), fett: tr.classList.contains('zwischen') };
+    });
+  }
+
+  async function pdfErstellen() {
+    if (!window.jspdf) for (const s of PDF_SKRIPTE) await ladeSkript(s);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const B = 210, rand = 18, graphit = [42, 47, 51], lime = [198, 242, 78], grau = [93, 101, 107], linie = [222, 225, 220];
+    const heute = new Date().toLocaleDateString('de-DE');
+
+    doc.setFillColor(...graphit); doc.rect(0, 0, B, 34, 'F');
+    doc.setTextColor(...lime); doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.text('Rentensteuer 2025', rand, 17);
+    doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.text(`Zusammenfassung Ihrer Angaben und der geschätzten Einkommensteuer · erstellt am ${heute}`, rand, 26);
+
+    // Ergebnis-Kasten
+    const rw = rechenwegSammeln();
+    const gesamt = rw.find(z => z.l === 'Steuer insgesamt')?.w || '';
+    const saldoEl = document.querySelector('#summe .saldo');
+    const saldo = saldoEl ? pdfText(saldoEl.textContent) : '';
+    let y = 44;
+    doc.setFillColor(238, 248, 212); doc.roundedRect(rand, y, B - 2 * rand, saldo ? 26 : 20, 3, 3, 'F');
+    doc.setTextColor(...grau); doc.setFontSize(9); doc.text('STEUER FÜR 2025 INSGESAMT (SCHÄTZUNG)', rand + 6, y + 8);
+    doc.setTextColor(...graphit); doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.text(gesamt, rand + 6, y + 16);
+    if (saldo) { doc.setFontSize(11); doc.text(saldo, rand + 6, y + 23); }
+    y += saldo ? 34 : 28;
+
+    const tabelle = (titel, body, spalten) => {
+      doc.autoTable({
+        startY: y, margin: { left: rand, right: rand, bottom: 20 },
+        head: [[{ content: titel, colSpan: spalten, styles: { fillColor: graphit, textColor: lime, fontStyle: 'bold', fontSize: 11 } }]],
+        body, theme: 'plain',
+        styles: { font: 'helvetica', fontSize: 9.5, textColor: graphit, cellPadding: { top: 1.8, bottom: 1.8, left: 2, right: 2 }, lineColor: linie, lineWidth: { bottom: 0.2 } },
+        columnStyles: spalten === 2 ? { 0: { cellWidth: 105 }, 1: { halign: 'right' } } : {},
+        didParseCell: d => { if (d.section === 'body' && d.row.raw?.kopfZeile) { d.cell.styles.fontStyle = 'bold'; d.cell.styles.fillColor = [243, 244, 241]; } },
+      });
+      y = doc.lastAutoTable.finalY + 8;
+    };
+    const kopfZeile = (text, spalten) => { const r = [{ content: text, colSpan: spalten }]; r.kopfZeile = true; return r; };
+
+    // Angaben
+    angabenSammeln().forEach(b => {
+      const body = b.zeilen.map(z => z.kopf ? kopfZeile(z.kopf, 2) : [z.l, z.w]);
+      tabelle(`Angaben: ${b.titel}`, body, 2);
+    });
+
+    // Belege
+    if (BELEGE.length) {
+      const body = BELEGE.map(b => [
+        b.datum ? b.datum.split('-').reverse().join('.') : '',
+        pdfText([b.aussteller, b.beschreibung].filter(Boolean).join(' – ')),
+        pdfText(FELDER[b.feld] || ''),
+        pdfText(euro(b.betrag || 0, 2)),
+      ]);
+      doc.autoTable({
+        startY: y, margin: { left: rand, right: rand, bottom: 20 }, theme: 'plain',
+        head: [[{ content: 'Übernommene Belege', colSpan: 4, styles: { fillColor: graphit, textColor: lime, fontStyle: 'bold', fontSize: 11 } }],
+               ['Datum', 'Aussteller / Beschreibung', 'Bereich', 'Betrag']],
+        headStyles: { textColor: grau, fontSize: 8.5 },
+        body, styles: { fontSize: 9, textColor: graphit, lineColor: linie, lineWidth: { bottom: 0.2 } },
+        columnStyles: { 0: { cellWidth: 22 }, 3: { halign: 'right', cellWidth: 26 } },
+      });
+      y = doc.lastAutoTable.finalY + 8;
+    }
+
+    // Rechenweg
+    const body = rw.map(z => {
+      if (z.kopf) return kopfZeile(z.kopf, 2);
+      const r = [z.d ? `${z.l}\n${z.d}` : z.l, z.w];
+      if (z.fett) r.kopfZeile = true;
+      return r;
+    });
+    tabelle('So wird gerechnet', body, 2);
+    document.querySelectorAll('#rechenweg .notiz').forEach(n => tabelle('Hinweis', [[pdfText(n.textContent)]], 1));
+
+    // Fußzeile auf jeder Seite
+    const seiten = doc.getNumberOfPages();
+    for (let i = 1; i <= seiten; i++) {
+      doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...grau);
+      doc.text('Schätzung nach den Regeln für 2025. Ersetzt keinen Steuerbescheid und keine Steuerberatung.', rand, 287);
+      doc.text(`Seite ${i} von ${seiten}`, B - rand, 287, { align: 'right' });
+    }
+    return doc.output('blob');
+  }
+
+  async function pdfAnbieten() {
+    const knopf = $('#btn-pdf'), st = $('#pdf-status');
+    knopf.disabled = true; st.textContent = 'PDF wird erstellt …';
+    const name = `Rentensteuer-2025-${new Date().toISOString().slice(0, 10)}.pdf`;
+    try {
+      const blob = await pdfErstellen();
+      let downloads = null;
+      try { downloads = window.claude?.use ? await window.claude.use('downloads') : null; } catch (e) { downloads = null; }
+      if (downloads) {
+        try { await downloads.save({ filename: name, data: blob }); st.textContent = 'PDF gespeichert.'; }
+        catch (e) { st.textContent = e?.code === 'declined' ? 'Speichern abgebrochen.' : 'Speichern ging hier nicht.'; }
+        return;
+      }
+      const datei = new File([blob], name, { type: 'application/pdf' });
+      const handy = matchMedia('(pointer: coarse)').matches;
+      if (handy && navigator.canShare?.({ files: [datei] })) {
+        try { await navigator.share({ files: [datei], title: 'Rentensteuer 2025' }); st.textContent = ''; return; }
+        catch (e) { if (e?.name === 'AbortError') { st.textContent = ''; return; } }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      st.textContent = 'PDF heruntergeladen.';
+    } catch (e) {
+      st.textContent = 'Das PDF konnte nicht erstellt werden. Bitte mit Internetverbindung noch einmal versuchen.';
+    } finally { knopf.disabled = false; }
+  }
+  $('#btn-pdf').addEventListener('click', pdfAnbieten);
 
   // Ereignisse
   $('#form').addEventListener('input', () => { $('#beispiel-hinweis').hidden = true; aktualisieren(); });
