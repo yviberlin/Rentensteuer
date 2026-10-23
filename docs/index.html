@@ -1708,8 +1708,10 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
   $('#form').addEventListener('change', () => aktualisieren());
   $('#form').addEventListener('submit', e => e.preventDefault());
   $('#krank-details').addEventListener('toggle', () => { $('#krank-pfeil').textContent = $('#krank-details').open ? '▲' : '▼'; });
-  $('#btn-beispiel').addEventListener('click', () => { setze(BEISPIEL); $('#beispiel-hinweis').hidden = false; aktualisieren(); });
-  $('#btn-leeren').addEventListener('click', () => { setze(LEER); $('#beispiel-hinweis').hidden = true; aktualisieren(); });
+  // Neu anfangen: nach Beispiel oder Leeren immer zurück zu Schritt 1.
+  function vonVorn() { $('#pdf-status').textContent = ''; zeigeSchritt(0); window.scrollTo({ top: 0 }); }
+  $('#btn-beispiel').addEventListener('click', () => { setze(BEISPIEL); $('#beispiel-hinweis').hidden = false; aktualisieren(); vonVorn(); });
+  $('#btn-leeren').addEventListener('click', () => { setze(LEER); $('#beispiel-hinweis').hidden = true; aktualisieren(); vonVorn(); });
 
   // Start: gespeicherte Eingaben oder Beispiel
   let gespeichert = null;
