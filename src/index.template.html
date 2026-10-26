@@ -427,7 +427,7 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
         </fieldset>
       </section>
       <section class="schritt" data-schritt="gezahlt" data-titel="Bereits gezahlt" hidden>
-        <div class="schritt-kopf"><h2 tabindex="-1">Bereits gezahlt</h2><p class="intro">Hat das Finanzamt 2025 schon Vorauszahlungen verlangt?</p></div>
+        <div class="schritt-kopf"><h2 tabindex="-1">Bereits gezahlt</h2><p class="intro">Was wurde für 2025 schon bezahlt, durch Vorauszahlungen oder Lohnsteuer auf eine Werkspension?</p></div>
       <fieldset>
         <legend>Bereits gezahlt</legend>
         <div class="felder">
@@ -435,6 +435,11 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
             <label for="vorauszahlungen">Vorauszahlungen an das Finanzamt 2025</label>
             <div class="eingabe"><input id="vorauszahlungen" inputmode="decimal"><span class="einheit">€</span></div>
             <span class="hilfe">Nur falls das Finanzamt vierteljährliche Vorauszahlungen festgesetzt hat.</span>
+          </div>
+          <div class="feld">
+            <label for="lohnsteuer">Lohnsteuer auf die Werkspension</label>
+            <div class="eingabe"><input id="lohnsteuer" inputmode="decimal"><span class="einheit">€</span></div>
+            <span class="hilfe">Lohnsteuer, Soli und Kirchensteuer, die der frühere Arbeitgeber einbehalten hat (Lohnsteuerbescheinigung Nummer 4 bis 6). Bei Paaren beide zusammen.</span>
           </div>
         </div>
       </fieldset>
@@ -510,6 +515,11 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
           <label data-for="rentenbeginn">Rentenbeginn (Jahr)</label>
           <div class="eingabe"><input data-k="rentenbeginn" inputmode="numeric" maxlength="4"></div>
           <span class="hilfe" data-anteil>Bestimmt den steuerpflichtigen Anteil.</span>
+        </div>
+        <div class="feld">
+          <label data-for="vorrenteEigen">Davor schon eine andere Rente bekommen? Beginn (Jahr)</label>
+          <div class="eingabe"><input data-k="vorrenteEigen" inputmode="numeric" maxlength="4" placeholder="optional"></div>
+          <span class="hilfe">Zum Beispiel Erwerbsminderungsrente vor der Altersrente. Dann zählt deren Beginn für den steuerpflichtigen Anteil.</span>
         </div>
         <div class="feld breit">
           <details class="unterpunkte freibetrag" data-fb="eigen" open>
@@ -602,6 +612,11 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
           <div class="eingabe"><input data-k="versorgungsbeginn" inputmode="numeric" maxlength="4"></div>
           <span class="hilfe">Bestimmt den Versorgungsfreibetrag.</span>
         </div>
+        <div class="feld">
+          <label data-for="versorgungBemessung">Bemessungsgrundlage für den Versorgungsfreibetrag</label>
+          <div class="eingabe"><input data-k="versorgungBemessung" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+          <span class="hilfe">Nummer 29 der Lohnsteuerbescheinigung. Wird im ersten Jahr festgelegt und ändert sich mit Erhöhungen nicht. Leer lassen, dann wird der heutige Betrag genommen.</span>
+        </div>
       </div>
     </div>
     <div class="gruppe" data-teil="vorsorge">
@@ -686,7 +701,7 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
     ausgaben: { haushaltsnah: '480', handwerker: '1.350', 'krankheit.zahn': '1.200', 'krankheit.zuzahlungen': '310', 'krankheit.hilfsmittel': '650', 'krankheit.fahrten': '120', spenden: '200' },
     vorauszahlungen: '',
   };
-  const LEER = { stand: 'allein', kirche: '0', personen: [{}, {}], kap: {}, ausgaben: {}, vorauszahlungen: '' };
+  const LEER = { stand: 'allein', kirche: '0', personen: [{}, {}], kap: {}, ausgaben: {}, vorauszahlungen: '', lohnsteuer: '' };
   const aFelder = () => document.querySelectorAll('[data-a]');
   const SCHRITTE = [...document.querySelectorAll('.schritt')];
   let aktuell = 0;
@@ -762,6 +777,7 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
       modus: Object.fromEntries([...document.querySelectorAll('.ausgaben-schritt')].map(fs => [fs.closest('.schritt').dataset.schritt, fs.dataset.modus])),
       schritt: aktuell,
       vorauszahlungen: $('#vorauszahlungen').value,
+      lohnsteuer: $('#lohnsteuer').value,
     };
   }
   function setze(z) {
@@ -778,6 +794,7 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
     $('#kap-ertraege').value = z.kap?.ertraege ?? '';
     $('#kap-einbehalten').value = z.kap?.einbehalten ?? '';
     $('#vorauszahlungen').value = z.vorauszahlungen ?? '';
+    $('#lohnsteuer').value = z.lohnsteuer ?? '';
     document.querySelectorAll('.ausgaben-schritt').forEach(fs => {
       const m = (z.modus || {})[fs.closest('.schritt').dataset.schritt] === 'hochladen' ? 'hochladen' : 'eintragen';
       fs.dataset.modus = m;
@@ -1070,10 +1087,11 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
       k.querySelector('[data-witwenanteil]').textContent = pp.witwenrente > 0 && wj >= 1950 && wj <= 2025
         ? `Steuerpflichtiger Anteil der Witwenrente: ${(besteuerungsanteil(wj) * 100).toLocaleString('de-DE')} %` + (wj !== wb ? ` (nach Rentenbeginn des Partners ${wj})` : '')
         : 'Dann zählt dessen Rentenbeginn für den steuerpflichtigen Anteil. Leer lassen, wenn der Partner noch keine Rente hatte.';
-      const beginn = zahl(k.querySelector('[data-k="rentenbeginn"]').value);
+      const beginnR = zahl(k.querySelector('[data-k="rentenbeginn"]').value), vorR = pp.vorrenteEigen;
+      const beginn = vorR > 0 && vorR < beginnR ? Math.max(2005, vorR) : beginnR;
       const el = k.querySelector('[data-anteil]');
       el.textContent = beginn >= 1950 && beginn <= 2025
-        ? `Steuerpflichtiger Anteil: ${(besteuerungsanteil(beginn) * 100).toLocaleString('de-DE')} %`
+        ? `Steuerpflichtiger Anteil: ${(besteuerungsanteil(beginn) * 100).toLocaleString('de-DE')} %` + (beginn !== beginnR ? ` (nach Beginn der vorherigen Rente ${beginn})` : '')
         : 'Bestimmt den steuerpflichtigen Anteil.';
     });
 
@@ -1083,6 +1101,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
       personen: [lesePerson(0), lesePerson(1)],
       kapital: { ertraege: zahl(z.kap.ertraege), einbehalten: zahl(z.kap.einbehalten) },
       vorauszahlungen: zahl(z.vorauszahlungen),
+      lohnsteuer: zahl(z.lohnsteuer),
       ausgaben: leseAusgaben(z.ausgaben),
     };
     // Fehlende KV-Beiträge: Schätzung verwenden und kennzeichnen
@@ -1120,7 +1139,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
   function zeichne(r, kvGeschaetzt) {
     const kapSteuer = r.kapSteuer.est + r.kapSteuer.soli + r.kapSteuer.kist;
     let saldo = '';
-    if (r.vorauszahlungen > 0 || r.kapital.einbehalten > 0) {
+    if (r.vorauszahlungen > 0 || r.kapital.einbehalten > 0 || r.lohnsteuer > 0) {
       saldo = r.saldo <= 0
         ? `<div class="saldo erstattung">Voraussichtliche Erstattung ${euro2(-r.saldo)}</div>`
         : `<div class="saldo nachzahlung">Voraussichtliche Nachzahlung ${euro2(r.saldo)}</div>`;
@@ -1192,6 +1211,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     t += zeile('Steuer insgesamt', euro2(r.gesamt), 'zwischen');
     if (r.kapital.einbehalten) t += zeile('Von der Bank schon einbehalten', '− ' + euro2(r.kapital.einbehalten), 'minus');
     if (r.vorauszahlungen) t += zeile('Vorauszahlungen', '− ' + euro2(r.vorauszahlungen), 'minus');
+    if (r.lohnsteuer) t += zeile('Lohnsteuer auf die Werkspension', '− ' + euro2(r.lohnsteuer), 'minus');
 
     let notiz = '';
     const verfallen = (r.erm.haushalt35aVoll - r.erm.haushalt35a) + (r.erm.parteiVoll - r.erm.partei);
@@ -1242,6 +1262,9 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     'kap-ertraege': () => 'Anlage KAP, Z. 7 (Kz 210); Günstigerprüfung Z. 4',
     'kap-einbehalten': () => 'Anlage KAP, Z. 37 bis 39 (Kz 280 bis 282)',
     vorauszahlungen: () => 'nicht eintragen, kennt das Finanzamt',
+    lohnsteuer: () => 'Anlage N, Z. 6 bis 9 (kommt meist automatisch)',
+    versorgungBemessung: () => 'Anlage N, Z. 12 (Kz 201)',
+    vorrenteEigen: () => 'Anlage R, Z. 7 (Kz 105)',
     haushaltsnah: () => 'Anlage Haushaltsnahe Aufwendungen, Z. 5 (Kz 212)',
     minijob: () => 'Anlage Haushaltsnahe Aufwendungen, Z. 4 (Kz 202)',
     handwerker: () => 'Anlage Haushaltsnahe Aufwendungen, Z. 6 bis 9 (Summe Kz 214)',

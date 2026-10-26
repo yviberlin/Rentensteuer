@@ -141,8 +141,12 @@ function einkuenftePerson(person, p = P2025) {
   }
   const rente = pos(person.gesRente);
   const beginnEigen = Number(person.rentenbeginn) || p.jahr;
-  let renteSteuerpflichtig = renteTeil(rente, beginnEigen, beginnEigen,
-    { freibetrag: pos(person.rentenfreibetrag), anpassung: pos(person.rentenanpassung), erstjahr: pos(person.erstjahresrente) }, 'gesRente', 'Gesetzliche Rente');
+  // Folgerente auch bei der eigenen Rente, z. B. Erwerbsminderungsrente vor der Altersrente (§ 22 Nr. 1 S. 3 a aa S. 8)
+  const vorEigen = Number(person.vorrenteEigen) || 0;
+  const jahrEigen = vorEigen > 0 && vorEigen < beginnEigen ? Math.max(2005, vorEigen) : beginnEigen;
+  let renteSteuerpflichtig = renteTeil(rente, beginnEigen, jahrEigen,
+    { freibetrag: pos(person.rentenfreibetrag), anpassung: pos(person.rentenanpassung), erstjahr: pos(person.erstjahresrente) }, 'gesRente', 'Gesetzliche Rente',
+    jahrEigen !== beginnEigen ? ` (nach Beginn der vorherigen Rente ${jahrEigen})` : '');
 
   // Folgerente (§ 22 Nr. 1 S. 3 a aa S. 8): Laufzeit der Rente des verstorbenen Partners wird angerechnet,
   // der Anteil richtet sich dann nach dessen Rentenbeginn, frühestens 2005.
@@ -172,12 +176,18 @@ function einkuenftePerson(person, p = P2025) {
   let einkVb = 0;
   if (vb > 0) {
     const w = versorgungsfreibetragWerte(Number(person.versorgungsbeginn) || p.jahr);
-    const vfb = Math.min(vb * w.satz, w.max);
+    // § 19 Abs. 2 S. 4 und 8–10: Bemessungsgrundlage wird im ersten Jahr festgelegt und gilt für die ganze Laufzeit.
+    const bemessung = pos(person.versorgungBemessung);
+    const grundlage = bemessung > 0 ? bemessung : vb;
+    const vfb = Math.min(grundlage * w.satz, w.max);
     const freiGesamt = Math.min(vb, Math.ceil(vfb) + w.zuschlag);
     const wk = Math.min(p.wkPauschaleVersorgung, vb - freiGesamt);
     einkVb = vb - freiGesamt - wk;
+    const gedeckelt = grundlage * w.satz >= w.max;
     zeilen.push({ art: 'vb', label: 'Werkspension (Versorgungsbezug)', brutto: vb, abzug: freiGesamt + wk,
-      detail: `Versorgungsfreibetrag ${Math.round(freiGesamt)} € inkl. Zuschlag, 102 € Werbungskosten.` });
+      geschaetzt: !bemessung && !gedeckelt,
+      detail: `Versorgungsfreibetrag ${Math.round(freiGesamt)} € inkl. Zuschlag` +
+        (bemessung ? ' (aus der Bemessungsgrundlage)' : gedeckelt ? ' (Höchstbetrag)' : ' (aus dem heutigen Betrag geschätzt, eher zu hoch)') + ', 102 € Werbungskosten.' });
   }
 
   // Platzhalter: Nebenjob (Arbeitslohn), Vermietung, Selbständig, private Rente
@@ -349,7 +359,8 @@ function berechne(eingabe, p = P2025) {
     durchschnittssatz: einkommenBrutto > 0 ? gesamt / einkommenBrutto : 0,
     vorauszahlungen: pos(eingabe.vorauszahlungen),
     // positiv = Nachzahlung, negativ = Erstattung
-    saldo: r2(gesamt - pos(eingabe.vorauszahlungen) - kapEinbehalten),
+    lohnsteuer: pos(eingabe.lohnsteuer),
+    saldo: r2(gesamt - pos(eingabe.vorauszahlungen) - kapEinbehalten - pos(eingabe.lohnsteuer)),
   };
 }
 
