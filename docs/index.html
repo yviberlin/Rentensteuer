@@ -211,6 +211,14 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
 .rechenweg tr.zwischen td { font-weight: 700; border-bottom: 2px solid var(--ink); }
 .rechenweg tr.kopf td { padding-top: 14px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 0; }
 .rechenweg tr.minus td.zahl { color: var(--muted); }
+.pflege-wahl { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pflege-wahl h3, .pflege-wahl .hilfe { margin: 0; }
+.wahl-optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.wahl-option { text-align: left; font: inherit; color: inherit; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+.wahl-option[aria-checked="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.wahl-option .titel { font-weight: 700; }
+.wahl-option .betrag { font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 700; }
+.wahl-option .marke { align-self: flex-start; font-size: 0.75rem; font-weight: 700; background: var(--lime); color: #1f2326; border-radius: 999px; padding: 1px 8px; }
 .pdf-export { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .pdf-export h3 { margin: 0; }
 .pdf-export .hilfe { margin: 0; }
@@ -474,6 +482,11 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
       </section>
       <section class="schritt" data-schritt="ergebnis" data-titel="Ergebnis" hidden>
         <div class="schritt-kopf"><h2 tabindex="-1">Ergebnis</h2><p class="intro">Hier ist Ihre geschätzte Steuer für 2025 mit dem ganzen Rechenweg. Sie können jeden Schritt oben noch einmal öffnen und ändern.</p></div>
+        <div class="gruppe pflege-wahl" id="pflege-wahl" hidden>
+          <h3>Pflegekosten oder Behinderten-Pauschbetrag</h3>
+          <p class="hilfe">Beides zusammen geht nicht (§ 33b Abs. 1 EStG). Die App hat beide Wege gerechnet. Krankheitskosten zählen in beiden Fällen.</p>
+          <div class="wahl-optionen" role="radiogroup" aria-label="Welcher Weg?"></div>
+        </div>
         <div class="gruppe pdf-export">
           <h3>Als PDF speichern</h3>
           <p class="hilfe">Alle Angaben, Belege und der Rechenweg in einer Datei, zum Ablegen oder für die Steuererklärung.</p>
@@ -981,16 +994,40 @@ function berechne(eingabe, p = P2025) {
   const kistNetto = Math.max(0, pos(a.kirchensteuerGezahlt) - pos(a.kirchensteuerErstattet));
 
   // Außergewöhnliche Belastungen mit zumutbarer Belastung
-  const krank = krankheitskosten(a.krankheit);
+  // Pflegekosten (ambulant und Heim) und Behinderten-Pauschbetrag schließen sich aus (§ 33b Abs. 1): günstigeren Weg wählen.
+  const krankAlle = krankheitskosten(a.krankheit);
+  const pflegeAmb = Math.min(krankAlle, pos(a.krankheit?.pflegeAmbulant));
+  const krankOhnePflege = krankAlle - pflegeAmb;
   const heimBrutto = pos(a.krankheit?.pflegeheim);
   const heimMonate = Math.min(12, Math.max(0, Number(a.krankheit?.heimMonate) || 12));
   const haushaltsersparnis = a.krankheit?.haushaltAufgeloest && heimBrutto > 0 ? Math.round(p.haushaltsersparnis * heimMonate / 12) : 0;
   const heim = Math.max(0, heimBrutto - haushaltsersparnis);
   const bestattung = pos(a.bestattung);
   const fahrtPausch = pers.reduce((s, x) => s + fahrtkostenPauschale(x.eingabe, p), 0);
-  const agBSumme = krank + heim + bestattung + fahrtPausch;
-  const behinderung = pers.reduce((s, x) => s + behindertenPauschbetrag(x.eingabe, p), 0);
+  const pauschJe = pers.map(x => behindertenPauschbetrag(x.eingabe, p));
+  const behinderungVoll = pauschJe.reduce((s, v) => s + v, 0);
   const pflege = pers.reduce((s, x) => s + pflegePauschbetrag(x.eingabe, p), 0);
+  const pflegekosten = pflegeAmb + heim;
+  // Weg "Kosten": Pflegekosten zählen, der höchste Pauschbetrag (die gepflegte Person) entfällt.
+  const varianten = pflegekosten > 0 && behinderungVoll > 0
+    ? [{ weg: 'pausch', krank: krankOhnePflege, heim: 0, pflegeAmb: 0, behinderung: behinderungVoll },
+       { weg: 'kosten', krank: krankAlle, heim, pflegeAmb, behinderung: behinderungVoll - Math.max(...pauschJe), entfaellt: Math.max(...pauschJe) }]
+    : [{ weg: 'beides', krank: krankAlle, heim, pflegeAmb, behinderung: behinderungVoll }];
+
+  const ergebnisse = varianten.map(v => lauf(v));
+  if (ergebnisse.length === 1) return ergebnisse[0];
+  // Beide Wege rechnen; der günstigere ist empfohlen, der Nutzer kann den anderen wählen.
+  const [rp, rk] = ergebnisse;
+  const empfohlen = rk.gesamt < rp.gesamt ? 'kosten' : 'pausch';
+  const gewaehlt = ['pausch', 'kosten'].includes(eingabe.pflegeWeg) ? eingabe.pflegeWeg : empfohlen;
+  const res = gewaehlt === 'kosten' ? rk : rp;
+  res.pflegeWahl = { gewaehlt, empfohlen, ersparnis: r2(Math.abs(rp.gesamt - rk.gesamt)), entfaellt: varianten[1].entfaellt, pflegekosten,
+    pausch: { gesamt: rp.gesamt, saldo: rp.saldo }, kosten: { gesamt: rk.gesamt, saldo: rk.saldo } };
+  return res;
+
+  function lauf(v) {
+  const krank = v.krank, behinderung = v.behinderung;
+  const agBSumme = krank + v.heim + bestattung + fahrtPausch;
 
   function rechne(mitKapital) {
     const kapJePerson = mitKapital ? kapEink / anzahl : 0;
@@ -1014,7 +1051,8 @@ function berechne(eingabe, p = P2025) {
   // Abgeltungsteuer (bei Kirchensteuer ermäßigter Satz nach § 32d Abs. 1)
   const kapESt = kiSatz > 0 ? Math.floor(kapEink / (4 + kiSatz) * 100) / 100 : Math.floor(kapEink * p.abgeltungSatz * 100) / 100;
   const mit = rechne(true);
-  const guenstiger = kapEink > 0 && mit.est < ohne.est + kapESt;
+  const last = est => est + (est > p.soliFreigrenze * (splitting ? 2 : 1) ? Math.min(est * 0.055, (est - p.soliFreigrenze * (splitting ? 2 : 1)) * 0.119) : 0) + est * kiSatz;
+  const guenstiger = kapEink > 0 && last(mit.est) < last(ohne.est) + kapESt * (1.055 + kiSatz);
   const basis = guenstiger ? mit : ohne;
 
   const estTarif = basis.est;
@@ -1052,7 +1090,7 @@ function berechne(eingabe, p = P2025) {
     summeEinkuenfte: basis.summeEink, altersentlastung: basis.ae, gesamtbetrag: basis.gesamtbetrag,
     vorsorge, sonderausgaben: basis.sonderausgaben, sonderPausch,
     sonder: { spenden: basis.spenden, spendenEingabe: pos(a.spenden), parteiSonder, kirchensteuer: kistNetto, tatsaechlich: basis.sonderTatsaechlich },
-    agB: { krankheit: krank, heim, haushaltsersparnis, bestattung, fahrtPausch, summe: agBSumme, zumutbar: basis.zumutbar, abzug: basis.agBAbzug },
+    agB: { weg: v.weg, eingetragen: krankAlle + heim, krankheit: krank, heim: v.heim, haushaltsersparnis: v.heim ? haushaltsersparnis : 0, bestattung, fahrtPausch, summe: agBSumme, zumutbar: basis.zumutbar, abzug: basis.agBAbzug },
     behinderung, pflege,
     erm: { partei: erm34g, parteiVoll: erm34gVoll, haushalt35a: erm35a, haushalt35aVoll: erm35aSumme, einzeln: erm35aVoll },
     zvE: basis.zvE, estTarif, ermaessigung, est: estNachErm, soli, kist,
@@ -1064,6 +1102,7 @@ function berechne(eingabe, p = P2025) {
     lohnsteuer: pos(eingabe.lohnsteuer),
     saldo: r2(gesamt - pos(eingabe.vorauszahlungen) - kapEinbehalten - pos(eingabe.lohnsteuer)),
   };
+  }
 }
 
 if (typeof module !== 'undefined') module.exports = { freibetragsJahr, rentenniveau, zumutbareBelastung, behindertenPauschbetrag, fahrtkostenPauschale, krankheitskosten, P2025, tarif2025, einkommensteuer, besteuerungsanteil, versorgungsfreibetragWerte, altersentlastungWerte, schaetzeKvPv, berechne };
@@ -1146,6 +1185,7 @@ if (typeof module !== 'undefined') module.exports = { freibetragsJahr, rentenniv
     karten[i].querySelectorAll('[data-k]').forEach(inp => { o[inp.dataset.k] = inp.type === 'checkbox' ? inp.checked : inp.value; });
     return o;
   }
+  let PFLEGEWEG = '';   // '' = automatisch den günstigeren Weg
   function zustand() {
     return {
       stand: document.querySelector('input[name="stand"]:checked').value,
@@ -1158,6 +1198,7 @@ if (typeof module !== 'undefined') module.exports = { freibetragsJahr, rentenniv
       schritt: aktuell,
       vorauszahlungen: $('#vorauszahlungen').value,
       lohnsteuer: $('#lohnsteuer').value,
+      pflegeWeg: PFLEGEWEG,
     };
   }
   function setze(z) {
@@ -1175,6 +1216,7 @@ if (typeof module !== 'undefined') module.exports = { freibetragsJahr, rentenniv
     $('#kap-einbehalten').value = z.kap?.einbehalten ?? '';
     $('#vorauszahlungen').value = z.vorauszahlungen ?? '';
     $('#lohnsteuer').value = z.lohnsteuer ?? '';
+    PFLEGEWEG = ['pausch', 'kosten'].includes(z.pflegeWeg) ? z.pflegeWeg : '';
     document.querySelectorAll('.ausgaben-schritt').forEach(fs => {
       const m = (z.modus || {})[fs.closest('.schritt').dataset.schritt] === 'hochladen' ? 'hochladen' : 'eintragen';
       fs.dataset.modus = m;
@@ -1482,6 +1524,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
       kapital: { ertraege: zahl(z.kap.ertraege), einbehalten: zahl(z.kap.einbehalten) },
       vorauszahlungen: zahl(z.vorauszahlungen),
       lohnsteuer: zahl(z.lohnsteuer),
+      pflegeWeg: z.pflegeWeg,
       ausgaben: leseAusgaben(z.ausgaben),
     };
     // Fehlende KV-Beiträge: Schätzung verwenden und kennzeichnen
@@ -1507,7 +1550,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
         info.classList.toggle('warnung', !!z.geschaetzt);
       });
     });
-    $('#krank-summe').textContent = euro(r.agB.krankheit + r.agB.heim);
+    $('#krank-summe').textContent = euro(r.agB.eingetragen);
     $('#krank-pfeil').textContent = $('#krank-details').open ? '▲' : '▼';
     $('#krank-hilfe').textContent = r.agB.summe > 0
       ? `Ihre zumutbare Belastung liegt bei ${euro(r.agB.zumutbar)}. ` + (r.agB.abzug > 0 ? `Davon abziehbar: ${euro(r.agB.abzug)}.` : 'Ihre Kosten liegen darunter und wirken sich nicht aus.')
@@ -1516,6 +1559,22 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     if (speichern) { try { localStorage.setItem(KEY, JSON.stringify(z)); } catch (e) {} }
   }
 
+  function zeichnePflegeWahl(w) {
+    const box = $('#pflege-wahl');
+    box.hidden = !w;
+    if (!w) return;
+    const opt = (weg, titel, text) => `<button type="button" class="wahl-option" role="radio" data-weg="${weg}" aria-checked="${w.gewaehlt === weg}">
+        ${w.empfohlen === weg ? '<span class="marke">günstiger</span>' : ''}
+        <span class="titel">${titel}</span><span class="hilfe">${text}</span>
+        <span class="betrag">Steuer ${euro2(w[weg].gesamt)}</span></button>`;
+    box.querySelector('.wahl-optionen').innerHTML =
+      opt('pausch', 'Behinderten-Pauschbetrag', `${euro(w.entfaellt)} pauschal, Pflegekosten zählen nicht.`) +
+      opt('kosten', 'Tatsächliche Pflegekosten', `${euro(w.pflegekosten)} Pflegekosten, dafür kein Pauschbetrag.`);
+  }
+  $('#pflege-wahl').addEventListener('click', e => {
+    const b = e.target.closest('[data-weg]'); if (!b) return;
+    PFLEGEWEG = b.dataset.weg; aktualisieren();
+  });
   function zeichne(r, kvGeschaetzt) {
     const kapSteuer = r.kapSteuer.est + r.kapSteuer.soli + r.kapSteuer.kist;
     let saldo = '';
@@ -1595,6 +1654,10 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
 
     let notiz = '';
     const verfallen = (r.erm.haushalt35aVoll - r.erm.haushalt35a) + (r.erm.parteiVoll - r.erm.partei);
+    if (r.pflegeWahl) notiz += `<div class="notiz">Gerechnet mit ${r.pflegeWahl.gewaehlt === 'kosten' ? 'den Pflegekosten' : 'dem Behinderten-Pauschbetrag'}` +
+      (r.pflegeWahl.gewaehlt === r.pflegeWahl.empfohlen ? (r.pflegeWahl.ersparnis ? `, das ist ${euro(r.pflegeWahl.ersparnis)} günstiger.` : '. Beide Wege ergeben dieselbe Steuer.') : `, obwohl der andere Weg ${euro(r.pflegeWahl.ersparnis)} günstiger wäre.`) +
+      ` Umschalten im Schritt „Ergebnis“.</div>`;
+    zeichnePflegeWahl(r.pflegeWahl);
     if (verfallen > 0) notiz += `<div class="notiz">${euro(verfallen)} der Ermäßigung für Haushalt, Handwerker oder Parteispenden verfallen, weil die Einkommensteuer schon bei null ist.</div>`;
     if (r.kapital.guenstiger) notiz += `<div class="notiz">Günstigerprüfung: Ihre Zinsen werden mit Ihrem persönlichen Steuersatz besteuert statt mit 25 %. Das spart etwa ${euro(r.kapital.ersparnisGuenstiger)}. Dafür die Anlage KAP abgeben und die Günstigerprüfung ankreuzen.</div>`;
     else if (r.kapital.ertraege > 0 && r.kapital.einkuenfte === 0) notiz += `<div class="notiz">Ihre Zinsen liegen unter dem Sparer-Pauschbetrag und bleiben steuerfrei.</div>`;

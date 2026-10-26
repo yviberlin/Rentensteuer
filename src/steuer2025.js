@@ -279,16 +279,40 @@ function berechne(eingabe, p = P2025) {
   const kistNetto = Math.max(0, pos(a.kirchensteuerGezahlt) - pos(a.kirchensteuerErstattet));
 
   // Außergewöhnliche Belastungen mit zumutbarer Belastung
-  const krank = krankheitskosten(a.krankheit);
+  // Pflegekosten (ambulant und Heim) und Behinderten-Pauschbetrag schließen sich aus (§ 33b Abs. 1): günstigeren Weg wählen.
+  const krankAlle = krankheitskosten(a.krankheit);
+  const pflegeAmb = Math.min(krankAlle, pos(a.krankheit?.pflegeAmbulant));
+  const krankOhnePflege = krankAlle - pflegeAmb;
   const heimBrutto = pos(a.krankheit?.pflegeheim);
   const heimMonate = Math.min(12, Math.max(0, Number(a.krankheit?.heimMonate) || 12));
   const haushaltsersparnis = a.krankheit?.haushaltAufgeloest && heimBrutto > 0 ? Math.round(p.haushaltsersparnis * heimMonate / 12) : 0;
   const heim = Math.max(0, heimBrutto - haushaltsersparnis);
   const bestattung = pos(a.bestattung);
   const fahrtPausch = pers.reduce((s, x) => s + fahrtkostenPauschale(x.eingabe, p), 0);
-  const agBSumme = krank + heim + bestattung + fahrtPausch;
-  const behinderung = pers.reduce((s, x) => s + behindertenPauschbetrag(x.eingabe, p), 0);
+  const pauschJe = pers.map(x => behindertenPauschbetrag(x.eingabe, p));
+  const behinderungVoll = pauschJe.reduce((s, v) => s + v, 0);
   const pflege = pers.reduce((s, x) => s + pflegePauschbetrag(x.eingabe, p), 0);
+  const pflegekosten = pflegeAmb + heim;
+  // Weg "Kosten": Pflegekosten zählen, der höchste Pauschbetrag (die gepflegte Person) entfällt.
+  const varianten = pflegekosten > 0 && behinderungVoll > 0
+    ? [{ weg: 'pausch', krank: krankOhnePflege, heim: 0, pflegeAmb: 0, behinderung: behinderungVoll },
+       { weg: 'kosten', krank: krankAlle, heim, pflegeAmb, behinderung: behinderungVoll - Math.max(...pauschJe), entfaellt: Math.max(...pauschJe) }]
+    : [{ weg: 'beides', krank: krankAlle, heim, pflegeAmb, behinderung: behinderungVoll }];
+
+  const ergebnisse = varianten.map(v => lauf(v));
+  if (ergebnisse.length === 1) return ergebnisse[0];
+  // Beide Wege rechnen; der günstigere ist empfohlen, der Nutzer kann den anderen wählen.
+  const [rp, rk] = ergebnisse;
+  const empfohlen = rk.gesamt < rp.gesamt ? 'kosten' : 'pausch';
+  const gewaehlt = ['pausch', 'kosten'].includes(eingabe.pflegeWeg) ? eingabe.pflegeWeg : empfohlen;
+  const res = gewaehlt === 'kosten' ? rk : rp;
+  res.pflegeWahl = { gewaehlt, empfohlen, ersparnis: r2(Math.abs(rp.gesamt - rk.gesamt)), entfaellt: varianten[1].entfaellt, pflegekosten,
+    pausch: { gesamt: rp.gesamt, saldo: rp.saldo }, kosten: { gesamt: rk.gesamt, saldo: rk.saldo } };
+  return res;
+
+  function lauf(v) {
+  const krank = v.krank, behinderung = v.behinderung;
+  const agBSumme = krank + v.heim + bestattung + fahrtPausch;
 
   function rechne(mitKapital) {
     const kapJePerson = mitKapital ? kapEink / anzahl : 0;
@@ -312,7 +336,8 @@ function berechne(eingabe, p = P2025) {
   // Abgeltungsteuer (bei Kirchensteuer ermäßigter Satz nach § 32d Abs. 1)
   const kapESt = kiSatz > 0 ? Math.floor(kapEink / (4 + kiSatz) * 100) / 100 : Math.floor(kapEink * p.abgeltungSatz * 100) / 100;
   const mit = rechne(true);
-  const guenstiger = kapEink > 0 && mit.est < ohne.est + kapESt;
+  const last = est => est + (est > p.soliFreigrenze * (splitting ? 2 : 1) ? Math.min(est * 0.055, (est - p.soliFreigrenze * (splitting ? 2 : 1)) * 0.119) : 0) + est * kiSatz;
+  const guenstiger = kapEink > 0 && last(mit.est) < last(ohne.est) + kapESt * (1.055 + kiSatz);
   const basis = guenstiger ? mit : ohne;
 
   const estTarif = basis.est;
@@ -350,7 +375,7 @@ function berechne(eingabe, p = P2025) {
     summeEinkuenfte: basis.summeEink, altersentlastung: basis.ae, gesamtbetrag: basis.gesamtbetrag,
     vorsorge, sonderausgaben: basis.sonderausgaben, sonderPausch,
     sonder: { spenden: basis.spenden, spendenEingabe: pos(a.spenden), parteiSonder, kirchensteuer: kistNetto, tatsaechlich: basis.sonderTatsaechlich },
-    agB: { krankheit: krank, heim, haushaltsersparnis, bestattung, fahrtPausch, summe: agBSumme, zumutbar: basis.zumutbar, abzug: basis.agBAbzug },
+    agB: { weg: v.weg, eingetragen: krankAlle + heim, krankheit: krank, heim: v.heim, haushaltsersparnis: v.heim ? haushaltsersparnis : 0, bestattung, fahrtPausch, summe: agBSumme, zumutbar: basis.zumutbar, abzug: basis.agBAbzug },
     behinderung, pflege,
     erm: { partei: erm34g, parteiVoll: erm34gVoll, haushalt35a: erm35a, haushalt35aVoll: erm35aSumme, einzeln: erm35aVoll },
     zvE: basis.zvE, estTarif, ermaessigung, est: estNachErm, soli, kist,
@@ -362,6 +387,7 @@ function berechne(eingabe, p = P2025) {
     lohnsteuer: pos(eingabe.lohnsteuer),
     saldo: r2(gesamt - pos(eingabe.vorauszahlungen) - kapEinbehalten - pos(eingabe.lohnsteuer)),
   };
+  }
 }
 
 if (typeof module !== 'undefined') module.exports = { freibetragsJahr, rentenniveau, zumutbareBelastung, behindertenPauschbetrag, fahrtkostenPauschale, krankheitskosten, P2025, tarif2025, einkommensteuer, besteuerungsanteil, versorgungsfreibetragWerte, altersentlastungWerte, schaetzeKvPv, berechne };
