@@ -115,6 +115,11 @@ details.unterpunkte > summary::-webkit-details-marker { display: none; }
 details.unterpunkte > summary .wert { font-variant-numeric: tabular-nums; }
 details.unterpunkte > summary .pfeil { color: var(--accent-text); font-weight: 400; font-size: 0.9rem; white-space: nowrap; }
 details.unterpunkte[open] > summary { border-bottom: 1px dashed var(--line); }
+details.freibetrag { width: 100%; }
+details.freibetrag .fb-erkl { margin: 8px 0 4px; }
+details.freibetrag [data-fbinfo]:empty { display: none; }
+details.freibetrag [data-fbinfo] { margin: 8px 0 0; }
+details.freibetrag [data-fbinfo].warnung { color: var(--warn); }
 details.unterpunkte .innen { padding: 4px 14px 12px; display: flex; flex-direction: column; gap: 0; }
 details.unterpunkte .eingabe { background: var(--field); }
 details.unterpunkte .felder + .felder { border-top: 1px solid var(--line); }
@@ -506,10 +511,31 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
           <div class="eingabe"><input data-k="rentenbeginn" inputmode="numeric" maxlength="4"></div>
           <span class="hilfe" data-anteil>Bestimmt den steuerpflichtigen Anteil.</span>
         </div>
-        <div class="feld">
-          <label data-for="rentenfreibetrag">Rentenfreibetrag, falls bekannt</label>
-          <div class="eingabe"><input data-k="rentenfreibetrag" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
-          <span class="hilfe">Steht in einem früheren Steuerbescheid. Leer lassen, dann wird er geschätzt.</span>
+        <div class="feld breit">
+          <details class="unterpunkte freibetrag" data-fb="eigen" open>
+            <summary><span>Steuerfreier Teil der Rente</span><span><span class="wert" data-fbwert="eigen"></span> <span class="pfeil" aria-hidden="true"></span></span></summary>
+            <div class="innen">
+              <p class="hilfe fb-erkl">Der steuerfreie Teil wird einmal in Euro festgeschrieben, aus der Rente im Jahr nach dem Rentenbeginn. Spätere Erhöhungen sind voll steuerpflichtig. Ein Feld reicht, das oberste zählt zuerst.</p>
+              <div class="felder">
+                <div class="feld">
+                  <label data-for="rentenfreibetrag">Rentenfreibetrag laut Steuerbescheid</label>
+                  <div class="eingabe"><input data-k="rentenfreibetrag" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+                  <span class="hilfe">Steht in den Erläuterungen eines früheren Steuerbescheids.</span>
+                </div>
+                <div class="feld">
+                  <label data-for="rentenanpassung">Rentenanpassungsbetrag 2025</label>
+                  <div class="eingabe"><input data-k="rentenanpassung" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+                  <span class="hilfe">Summe der Erhöhungen seit dem festgeschriebenen Jahr. In Mein ELSTER unter Belegabruf (Rentenbezugsmitteilung), in ELSTER Anlage R Zeile 5.</span>
+                </div>
+                <div class="feld">
+                  <label data-for="erstjahresrente" data-basislabel="eigen">Jahresrente im ersten vollen Rentenjahr, brutto</label>
+                  <div class="eingabe"><input data-k="erstjahresrente" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+                  <span class="hilfe" data-basishilfe="eigen">Zwölf Monatsrenten brutto im Jahr nach dem Rentenbeginn, bei Rentenbeginn vor 2005 im Jahr 2005. Steht in der Rentenanpassungsmitteilung dieses Jahres.</span>
+                </div>
+              </div>
+              <p class="hilfe" data-fbinfo="eigen"></p>
+            </div>
+          </details>
         </div>
       </div>
     </div>
@@ -530,10 +556,31 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
           <div class="eingabe"><input data-k="vorrenteBeginn" inputmode="numeric" maxlength="4" placeholder="optional"></div>
           <span class="hilfe" data-witwenanteil>Dann zählt dessen Rentenbeginn für den steuerpflichtigen Anteil. Leer lassen, wenn der Partner noch keine Rente hatte.</span>
         </div>
-        <div class="feld">
-          <label data-for="witwenFreibetrag">Rentenfreibetrag der Witwenrente, falls bekannt</label>
-          <div class="eingabe"><input data-k="witwenFreibetrag" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
-          <span class="hilfe">Steht in einem früheren Steuerbescheid. Leer lassen, dann wird er geschätzt.</span>
+        <div class="feld breit">
+          <details class="unterpunkte freibetrag" data-fb="witwe" open>
+            <summary><span>Steuerfreier Teil der Witwenrente</span><span><span class="wert" data-fbwert="witwe"></span> <span class="pfeil" aria-hidden="true"></span></span></summary>
+            <div class="innen">
+              <p class="hilfe fb-erkl">Der steuerfreie Teil wird einmal in Euro festgeschrieben, aus der Rente im Jahr nach dem Rentenbeginn. Spätere Erhöhungen sind voll steuerpflichtig. Ein Feld reicht, das oberste zählt zuerst.</p>
+              <div class="felder">
+                <div class="feld">
+                  <label data-for="witwenFreibetrag">Rentenfreibetrag laut Steuerbescheid</label>
+                  <div class="eingabe"><input data-k="witwenFreibetrag" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+                  <span class="hilfe">Steht in den Erläuterungen eines früheren Steuerbescheids.</span>
+                </div>
+                <div class="feld">
+                  <label data-for="witwenAnpassung">Rentenanpassungsbetrag 2025</label>
+                  <div class="eingabe"><input data-k="witwenAnpassung" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+                  <span class="hilfe">Summe der Erhöhungen seit dem festgeschriebenen Jahr. In Mein ELSTER unter Belegabruf (Rentenbezugsmitteilung), in ELSTER Anlage R Zeile 5.</span>
+                </div>
+                <div class="feld">
+                  <label data-for="witwenErstjahr" data-basislabel="witwe">Jahresrente im ersten vollen Rentenjahr, brutto</label>
+                  <div class="eingabe"><input data-k="witwenErstjahr" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
+                  <span class="hilfe" data-basishilfe="witwe">Zwölf Monatsrenten brutto im Jahr nach dem Rentenbeginn, bei Rentenbeginn vor 2005 im Jahr 2005. Steht in der Rentenanpassungsmitteilung dieses Jahres.</span>
+                </div>
+              </div>
+              <p class="hilfe" data-fbinfo="witwe"></p>
+            </div>
+          </details>
         </div>
       </div>
     </div>
@@ -1043,6 +1090,24 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     eingabe.personen.forEach((p, i) => { if (!p.kvpv && (p.gesRente || p.witwenrente || p.betriebsrente22 || p.versorgungsbezuege)) { p.kvpv = schaetzeKvPv(p); geschaetzt.push(i); } });
 
     const r = berechne(eingabe);
+    // Steuerfreier Teil: Basisjahr in der Beschriftung, Stand unter den Feldern
+    karten.forEach((k, i) => {
+      const pp = lesePerson(i), zeilenP = r.personen[i]?.zeilen || [];
+      [['eigen', pp.rentenbeginn, 'gesRente', pp.gesRente], ['witwe', pp.witwenBeginn, 'witwenrente', pp.witwenrente]].forEach(([pre, beginn, art, betrag]) => {
+        const basis = beginn >= 1950 && beginn <= 2025 ? freibetragsJahr(beginn) : null;
+        k.querySelector(`[data-basislabel="${pre}"]`).textContent = basis && basis <= 2025 ? `Jahresrente ${basis}, brutto` : 'Jahresrente im ersten vollen Rentenjahr, brutto';
+        const z = zeilenP.find(x => x.art === art);
+        const info = k.querySelector(`[data-fbinfo="${pre}"]`), wert = k.querySelector(`[data-fbwert="${pre}"]`);
+        const det = k.querySelector(`details[data-fb="${pre}"]`);
+        det.querySelector('.pfeil').textContent = det.open ? '▲' : '▼';
+        if (!z || !betrag) { info.textContent = ''; info.classList.remove('warnung'); wert.textContent = ''; return; }
+        wert.textContent = euro(z.abzug) + ' frei';
+        info.textContent = z.geschaetzt
+          ? `Ohne Angabe schätzt die App die Rente ${freibetragsJahr(beginn)} über die Rentenerhöhungen seit damals. Das ist ungenau, wenn sich die Rente auch aus anderen Gründen geändert hat. Mit einem der Felder oben wird es genau.`
+          : '';
+        info.classList.toggle('warnung', !!z.geschaetzt);
+      });
+    });
     $('#krank-summe').textContent = euro(r.agB.krankheit + r.agB.heim);
     $('#krank-pfeil').textContent = $('#krank-details').open ? '▲' : '▼';
     $('#krank-hilfe').textContent = r.agB.summe > 0
@@ -1155,6 +1220,10 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     gesRente: () => 'Anlage R, Z. 4 (Kz 101)',
     rentenbeginn: () => 'Anlage R, Z. 6 (Kz 103)',
     rentenfreibetrag: () => 'nicht eintragen, rechnet das Finanzamt',
+    rentenanpassung: () => 'Anlage R, Z. 5 (Kz 102)',
+    erstjahresrente: () => 'nicht eintragen, nur für die Berechnung',
+    witwenAnpassung: () => 'Anlage R, Z. 5, 2. Rente (Kz 152)',
+    witwenErstjahr: () => 'nicht eintragen, nur für die Berechnung',
     witwenrente: () => 'Anlage R, Z. 4, 2. Rente (Kz 151)',
     witwenBeginn: () => 'Anlage R, Z. 6, 2. Rente (Kz 153)',
     vorrenteBeginn: () => 'Anlage R, Z. 7, 2. Rente (Kz 155)',
@@ -1212,6 +1281,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
       sec.querySelectorAll('legend[data-titel], h3, .feld').forEach(el => {
         if (!sichtbarIn(el, sec)) return;
         if (el.matches('legend[data-titel]')) { gruppe = pdfText(el.textContent); if (gruppe !== sec.dataset.titel) zeilen.push({ kopf: gruppe }); return; }
+        if (el.matches('.feld') && el.querySelector('.feld')) return;
         if (el.tagName === 'H3') { const k = pdfText(el.textContent); if (k !== sec.dataset.titel) zeilen.push({ kopf: k, unter: true }); return; }
         const radio = el.querySelector('input[type=radio]:checked');
         if (radio) { zeilen.push({ l: feldText(el), w: pdfText(el.querySelector(`label[for="${radio.id}"]`)?.textContent), e: elsterFuer(radio) }); return; }
@@ -1369,6 +1439,7 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
   $('#form').addEventListener('input', () => { $('#beispiel-hinweis').hidden = true; aktualisieren(); });
   $('#form').addEventListener('change', () => aktualisieren());
   $('#form').addEventListener('submit', e => e.preventDefault());
+  document.querySelectorAll('details.freibetrag').forEach(d => d.addEventListener('toggle', () => { d.querySelector('.pfeil').textContent = d.open ? '▲' : '▼'; }));
   $('#krank-details').addEventListener('toggle', () => { $('#krank-pfeil').textContent = $('#krank-details').open ? '▲' : '▼'; });
   // Neu anfangen: nach Beispiel oder Leeren immer zurück zu Schritt 1.
   function vonVorn() { $('#pdf-status').textContent = ''; zeigeSchritt(0); window.scrollTo({ top: 0 }); }

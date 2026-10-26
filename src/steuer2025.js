@@ -92,6 +92,20 @@ function schaetzeKvPv(person, p = P2025) {
   return Math.round(kv + pv);
 }
 
+// Rentenanpassungen zum 1. Juli (alte Bundesländer, ab Juli 2023 bundesweit einheitlich), in Prozent.
+// Nur für eine grobe Schätzung, wenn weder Freibetrag noch Rentenanpassungsbetrag noch Ausgangsrente bekannt sind.
+const RENTENANPASSUNG = { 2005: 0, 2006: 0, 2007: 0.54, 2008: 1.1, 2009: 2.41, 2010: 0, 2011: 0.99, 2012: 2.18, 2013: 0.25,
+  2014: 1.67, 2015: 2.1, 2016: 4.25, 2017: 1.9, 2018: 3.22, 2019: 3.18, 2020: 3.45, 2021: 0, 2022: 5.35, 2023: 4.39, 2024: 4.57, 2025: 3.74 };
+// Durchschnittliches Rentenniveau eines Jahres (halbes Jahr vor, halbes Jahr nach der Juli-Anpassung), 2004 = 1.
+function rentenniveau(jahr) {
+  let vorJuli = 1;
+  for (let j = 2005; j < jahr; j++) vorJuli *= 1 + (RENTENANPASSUNG[j] || 0) / 100;
+  return vorJuli * (1 + (1 + (RENTENANPASSUNG[jahr] || 0) / 100)) / 2;
+}
+// Basisjahr für den festgeschriebenen Freibetrag: das Jahr nach Rentenbeginn, bei Beginn vor 2005 das Jahr 2005
+// (§ 22 Nr. 1 Satz 3 Buchst. a Doppelbuchst. aa Satz 5 EStG).
+const freibetragsJahr = beginn => Math.max(2005, beginn + 1);
+
 // Einkünfte einer Person (ohne Kapitalerträge)
 function einkuenftePerson(person, p = P2025) {
   const zeilen = [];
@@ -100,19 +114,35 @@ function einkuenftePerson(person, p = P2025) {
   let wk22Rest = wk22Basis;
 
   // Gesetzliche Rente und Witwen-/Witwerrente: jede mit eigenem Anteil und Freibetrag
-  function renteTeil(betrag, beginn, anteilsJahr, fbBekannt, art, label, zusatz = '') {
+  // Steuerfreier Teil (§ 22 Nr. 1 S. 3 a aa S. 4–7): einmal in Euro festgeschrieben aus der Rente im Jahr nach Rentenbeginn.
+  // Spätere regelmäßige Erhöhungen sind voll steuerpflichtig. Reihenfolge: Bescheid, Rentenanpassungsbetrag, Ausgangsrente, Schätzung.
+  function renteTeil(betrag, beginn, anteilsJahr, angaben, art, label, zusatz = '') {
     if (betrag <= 0) return 0;
     const anteil = besteuerungsanteil(anteilsJahr);
-    let freibetrag, fbHinweis;
-    if (beginn < p.jahr && fbBekannt > 0) { freibetrag = fbBekannt; fbHinweis = 'laut Bescheid'; }
-    else { freibetrag = r2(betrag * (1 - anteil)); fbHinweis = beginn < p.jahr ? 'geschätzt' : 'Rentenbeginn 2025'; }
-    zeilen.push({ art, label, brutto: betrag, abzug: freibetrag,
-      detail: `Besteuerungsanteil ${(anteil * 100).toLocaleString('de-DE')} %${zusatz}, Rentenfreibetrag ${fbHinweis}.` });
+    const basis = freibetragsJahr(beginn);
+    let freibetrag, fbHinweis, geschaetzt = false;
+    if (basis > p.jahr) { freibetrag = r2(betrag * (1 - anteil)); fbHinweis = `wird erst ab ${basis} festgeschrieben`; }
+    else if (angaben.freibetrag > 0) { freibetrag = angaben.freibetrag; fbHinweis = 'laut Steuerbescheid'; }
+    else if (angaben.anpassung > 0) {
+      freibetrag = r2(Math.max(0, betrag - angaben.anpassung) * (1 - anteil));
+      fbHinweis = `aus Rentenanpassungsbetrag ${angaben.anpassung.toLocaleString('de-DE')} €`;
+    } else if (angaben.erstjahr > 0) {
+      freibetrag = r2(Math.min(betrag, angaben.erstjahr) * (1 - anteil));
+      fbHinweis = `aus der Jahresrente ${basis} (${angaben.erstjahr.toLocaleString('de-DE')} €)`;
+    } else {
+      const ausgang = basis === p.jahr ? betrag : betrag * rentenniveau(basis) / rentenniveau(p.jahr);
+      freibetrag = r2(ausgang * (1 - anteil));
+      fbHinweis = basis === p.jahr ? `aus der Rente ${basis}` : `grob geschätzt: Rente ${basis} über die Rentenerhöhungen zurückgerechnet`;
+      geschaetzt = basis < p.jahr;
+    }
+    zeilen.push({ art, label, brutto: betrag, abzug: freibetrag, geschaetzt,
+      detail: `Besteuerungsanteil ${(anteil * 100).toLocaleString('de-DE')} %${zusatz}, steuerfreier Teil ${fbHinweis}.` });
     return Math.max(0, betrag - freibetrag);
   }
   const rente = pos(person.gesRente);
   const beginnEigen = Number(person.rentenbeginn) || p.jahr;
-  let renteSteuerpflichtig = renteTeil(rente, beginnEigen, beginnEigen, pos(person.rentenfreibetrag), 'gesRente', 'Gesetzliche Rente');
+  let renteSteuerpflichtig = renteTeil(rente, beginnEigen, beginnEigen,
+    { freibetrag: pos(person.rentenfreibetrag), anpassung: pos(person.rentenanpassung), erstjahr: pos(person.erstjahresrente) }, 'gesRente', 'Gesetzliche Rente');
 
   // Folgerente (§ 22 Nr. 1 S. 3 a aa S. 8): Laufzeit der Rente des verstorbenen Partners wird angerechnet,
   // der Anteil richtet sich dann nach dessen Rentenbeginn, frühestens 2005.
@@ -120,7 +150,8 @@ function einkuenftePerson(person, p = P2025) {
   const beginnWitwe = Number(person.witwenBeginn) || p.jahr;
   const vorrente = Number(person.vorrenteBeginn) || 0;
   const jahrWitwe = vorrente > 0 && vorrente < beginnWitwe ? Math.max(2005, vorrente) : beginnWitwe;
-  renteSteuerpflichtig += renteTeil(witwe, beginnWitwe, jahrWitwe, pos(person.witwenFreibetrag), 'witwenrente', 'Witwen- oder Witwerrente',
+  renteSteuerpflichtig += renteTeil(witwe, beginnWitwe, jahrWitwe,
+    { freibetrag: pos(person.witwenFreibetrag), anpassung: pos(person.witwenAnpassung), erstjahr: pos(person.witwenErstjahr) }, 'witwenrente', 'Witwen- oder Witwerrente',
     jahrWitwe !== beginnWitwe ? ` (nach Rentenbeginn des Partners ${jahrWitwe})` : '');
   const wkRente = Math.min(wk22Rest, renteSteuerpflichtig);
   wk22Rest -= wkRente;
@@ -322,4 +353,4 @@ function berechne(eingabe, p = P2025) {
   };
 }
 
-if (typeof module !== 'undefined') module.exports = { zumutbareBelastung, behindertenPauschbetrag, fahrtkostenPauschale, krankheitskosten, P2025, tarif2025, einkommensteuer, besteuerungsanteil, versorgungsfreibetragWerte, altersentlastungWerte, schaetzeKvPv, berechne };
+if (typeof module !== 'undefined') module.exports = { freibetragsJahr, rentenniveau, zumutbareBelastung, behindertenPauschbetrag, fahrtkostenPauschale, krankheitskosten, P2025, tarif2025, einkommensteuer, besteuerungsanteil, versorgungsfreibetragWerte, altersentlastungWerte, schaetzeKvPv, berechne };
