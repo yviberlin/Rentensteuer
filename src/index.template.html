@@ -279,19 +279,19 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
         <div class="stapel" id="st-vorsorge"></div>
       </section>
       <section class="schritt" data-schritt="zinsen" data-titel="Zinsen" hidden>
-        <div class="schritt-kopf"><h2 tabindex="-1">Zinsen</h2><p class="intro">Zinsen und Dividenden aller Konten. Bis 1.000 € (Ehepaare 2.000 €) bleiben sie steuerfrei.</p></div>
+        <div class="schritt-kopf"><h2 tabindex="-1">Zinsen</h2><p class="intro">Zinsen und Dividenden aller Konten. Bis 1.000 € (Ehepaare 2.000 €) bleiben sie steuerfrei. Diesen Freibetrag zieht die App selbst ab: Tragen Sie die Erträge ungekürzt ein.</p></div>
       <fieldset>
         <legend>Zinsen und Kapitalerträge</legend>
         <div class="felder">
           <div class="feld">
             <label for="kap-ertraege">Zinsen und Dividenden 2025</label>
             <div class="eingabe"><input id="kap-ertraege" inputmode="decimal"><span class="einheit">€</span></div>
-            <span class="hilfe" id="kap-hilfe">Alle Konten zusammen, vor Steuern. Steht auf den Jahressteuerbescheinigungen der Banken.</span>
+            <span class="hilfe" id="kap-hilfe">Alle Konten zusammen, vor Steuern. Je Bank die Zeile „Höhe der Kapitalerträge“ (Anlage KAP Zeile 7) der Jahressteuerbescheinigung, alle Banken zusammengezählt. Nicht den Sparer-Pauschbetrag abziehen.</span>
           </div>
           <div class="feld">
             <label for="kap-einbehalten">Davon schon einbehaltene Steuer</label>
             <div class="eingabe"><input id="kap-einbehalten" inputmode="decimal"><span class="einheit">€</span></div>
-            <span class="hilfe">Kapitalertragsteuer, Soli und Kirchensteuer, die die Bank abgezogen hat.</span>
+            <span class="hilfe">Auf der Bescheinigung die Zeilen Kapitalertragsteuer, Solidaritätszuschlag und Kirchensteuer zusammen (Anlage KAP Zeile 37 bis 39). Steht dort 0,00, bleibt das Feld leer.</span>
           </div>
         </div>
       </fieldset>
@@ -1089,8 +1089,8 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
     karten[1].hidden = !paar;
     karten.forEach((k, i) => k.querySelectorAll('[data-titel]').forEach(l => { l.textContent = paar ? `Person ${i + 1}` : l.dataset.allein; }));
     $('#kap-hilfe').textContent = paar
-      ? 'Beide Partner zusammen, vor Steuern. Steht auf den Jahressteuerbescheinigungen der Banken.'
-      : 'Alle Konten zusammen, vor Steuern. Steht auf den Jahressteuerbescheinigungen der Banken.';
+      ? 'Beide Partner zusammen, vor Steuern. Je Bank die Zeile „Höhe der Kapitalerträge“ (Anlage KAP Zeile 7) der Jahressteuerbescheinigung, alle Banken zusammengezählt. Nicht den Sparer-Pauschbetrag abziehen.'
+      : 'Alle Konten zusammen, vor Steuern. Je Bank die Zeile „Höhe der Kapitalerträge“ (Anlage KAP Zeile 7) der Jahressteuerbescheinigung, alle Banken zusammengezählt. Nicht den Sparer-Pauschbetrag abziehen.';
 
     karten.forEach((k, i) => {
       const pp = lesePerson(i);
