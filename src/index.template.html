@@ -92,6 +92,7 @@ legend { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; 
 }
 .feld label { font-weight: 700; font-size: 0.95rem; }
 .feld .hilfe { color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+.wk-info { display: block; margin-top: 4px; min-height: 4.2em; color: var(--ink); font-weight: 600; }
 .eingabe { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--field); min-height: 46px; }
 .eingabe:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--accent-soft); }
 .eingabe input, .eingabe select { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: inherit; padding: 10px 12px; font-variant-numeric: tabular-nums; }
@@ -654,7 +655,7 @@ aside.ergebnis { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16p
         <div class="feld">
           <label data-for="werbungskostenRente">Kosten rund um die Rente</label>
           <div class="eingabe"><input data-k="werbungskostenRente" inputmode="decimal" placeholder="optional"><span class="einheit">€</span></div>
-          <span class="hilfe">Kontoführung des Rentenkontos (16 € pauschal werden meist anerkannt), Lohnsteuerhilfeverein oder Steuerberatung, Rentenberatung, Anwalt im Rentenstreit. Alles zusammen zählen. Wirkt nur, was über 102 € liegt.</span>
+          <span class="hilfe">Kontoführung des Rentenkontos (16 € pauschal werden meist anerkannt), Lohnsteuerhilfeverein oder Steuerberatung, Rentenberatung, Anwalt im Rentenstreit. Alles zusammen zählen. Wirkt nur, was über 102 € liegt.<span class="wk-info" data-wkinfo>Ohne Eintrag gelten 102 € pauschal.</span></span>
         </div>
       </div>
     </div>
@@ -1103,6 +1104,10 @@ Wenn das Bild kein Beleg ist, antworte {"feld":"keins","hinweis":"Kein Beleg erk
       k.querySelector('[data-witwenanteil]').textContent = pp.witwenrente > 0 && wj >= 1950 && wj <= 2025
         ? `Steuerpflichtiger Anteil der Witwenrente: ${(besteuerungsanteil(wj) * 100).toLocaleString('de-DE')} %` + (wj !== wb ? ` (nach Rentenbeginn des Partners ${wj})` : '')
         : 'Dann zählt dessen Rentenbeginn für den steuerpflichtigen Anteil. Leer lassen, wenn der Partner noch keine Rente hatte.';
+      const wkE = zahl(k.querySelector('[data-k="werbungskostenRente"]').value);
+      k.querySelector('[data-wkinfo]').textContent = wkE <= 0 ? 'Ohne Eintrag gelten 102 € pauschal.'
+        : wkE <= 102 ? `Ihre ${euro(wkE, 2)} liegen unter der Pauschale. Es bleibt bei 102 €, Sie brauchen keine Belege.`
+        : `Ihre ${euro(wkE, 2)} liegen ${euro(wkE - 102, 2)} über der Pauschale. Es zählt der volle Betrag; Belege aufheben.`;
       const beginnR = zahl(k.querySelector('[data-k="rentenbeginn"]').value), vorR = pp.vorrenteEigen;
       const beginn = vorR > 0 && vorR < beginnR ? Math.max(2005, vorR) : beginnR;
       const el = k.querySelector('[data-anteil]');
